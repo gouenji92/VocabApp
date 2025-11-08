@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tài khoản - VocabApp</title>
+  <link rel="stylesheet" href="/static/base.css" />
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; }
+    .top-header { background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; padding: 12px 20px; }
+    .header-content { max-width: 1000px; margin: 0 auto; display:flex; align-items:center; justify-content:space-between; }
+    .logo { font-size: 1.5em; font-weight: 700; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+    .nav-icons { display:flex; gap:12px; align-items:center; }
+    .nav-btn { padding:8px 12px; border-radius:8px; text-decoration:none; color:#333; }
+    .nav-btn:hover { background:#f0f2f5; }
+    .user-avatar, .user-avatar-img { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:white; background: linear-gradient(135deg, #667eea, #764ba2); object-fit: cover; }
+
+    main { max-width: 1000px; margin: 20px auto; padding: 0 16px 40px; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .section-title { font-weight: 700; margin: 0 0 12px 0; font-size: 1.2rem; }
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+    .field label { color:#555; font-size:.9rem; }
+    .field input[type="text"], .field input[type="email"], .field input[type="password"] { padding:10px 12px; border:1px solid #e4e6eb; border-radius:8px; background:#f7f8fa; }
+    .btn { padding:10px 16px; border:none; border-radius:8px; background: linear-gradient(135deg, #667eea, #764ba2); color:white; font-weight:700; cursor:pointer; }
+    .btn-ghost { padding:10px 16px; border:2px solid #667eea; color:#667eea; border-radius:8px; background:white; font-weight:700; cursor:pointer; text-decoration:none; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .message { padding:10px 12px; border-radius:8px; margin-bottom:12px; font-size:.95rem; }
+    .success { background:#ecfdf5; border:1px solid #10b981; color:#065f46; }
+    .error { background:#fef2f2; border:1px solid #ef4444; color:#991b1b; }
+    .avatar-preview { display:flex; align-items:center; gap:12px; }
+    .avatar-preview img, .avatar-preview .fallback { width:64px; height:64px; border-radius:50%; object-fit:cover; display:block; background: linear-gradient(135deg, #667eea, #764ba2); color:white; font-weight:700; align-items:center; justify-content:center; }
+  </style>
+</head>
+<body>
+  <div class="top-header">
+    <div class="header-content">
+      <a href="/" class="logo">VocabApp</a>
+      <div class="nav-icons">
+        <a href="/feed" class="nav-btn">🏠 Feed</a>
+        <a href="/sets" class="nav-btn">📚 Bộ từ</a>
+        <a href="/dashboard" class="nav-btn">📊 Thống kê</a>
+        <a href="/profile" class="nav-btn" style="font-weight:700;color:#667eea;">👤 Tài khoản</a>
+        <a href="/logout" class="nav-btn" style="color:#ef4444;">Đăng xuất</a>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2 class="section-title">👤 Hồ sơ</h2>
+        {% if message %}<div class="message success">✅ {{ message }}</div>{% endif %}
+        {% if error %}<div class="message error">❌ {{ error }}</div>{% endif %}
+        <form method="post" action="/profile/update" enctype="multipart/form-data">
+          <div class="field">
+            <label>Tên hiển thị</label>
+            <input type="text" name="display_name" value="{{ (user.display_name or username) if user else username }}" />
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" name="email" value="{{ user.email if user else '' }}" />
+          </div>
+          <div class="field">
+            <label>Ảnh đại diện (JPG/PNG, &lt; 2MB)</label>
+            <div class="avatar-preview">
+              {% if user and user.avatar %}
+                <img src="{{ user.avatar }}" alt="avatar">
+              {% else %}
+                <div class="fallback" style="display:flex;">{{ username[0].upper() }}</div>
+              {% endif %}
+              <input type="file" name="avatar" accept="image/png, image/jpeg" />
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn" type="submit">Lưu thay đổi</button>
+            <a href="/" class="btn-ghost">Hủy</a>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2 class="section-title">🔒 Đổi mật khẩu</h2>
+        <form method="post" action="/profile/change-password">
+          <div class="field">
+            <label>Mật khẩu hiện tại</label>
+            <input type="password" name="current_password" required />
+          </div>
+          <div class="field">
+            <label>Mật khẩu mới</label>
+            <input type="password" name="new_password" required />
+          </div>
+          <div class="field">
+            <label>Nhập lại mật khẩu mới</label>
+            <input type="password" name="new_password2" required />
+          </div>
+          <div class="row">
+            <button class="btn" type="submit">Cập nhật mật khẩu</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Học từ vựng</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; background:#f9fafb; }
+    .container { max-width: 640px; margin: auto; text-align:center; }
+    h1 { margin-bottom: .5rem; }
+    .card { border:2px solid #e5e7eb; padding:2rem; border-radius:16px; margin:2rem 0; background:#fff; min-height:180px; display:flex; flex-direction:column; justify-content:center; cursor:pointer; }
+    .card.flipped { background:#2563eb; color:#fff; }
+    .term { font-size:2rem; font-weight:700; }
+    .definition { font-size:1.4rem; margin-top:1rem; }
+    .pos { font-size:1rem; color:#6b7280; margin-top:.5rem; }
+    .rating { margin-top:2rem; }
+    .rating button { padding:.7rem 1.2rem; margin:.3rem; background:#10b981; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; }
+    .rating button.hard { background:#f59e0b; }
+    .rating button.fail { background:#ef4444; }
+    .info { margin:1rem 0; color:#6b7280; }
+    .actions { margin-top:1rem; }
+    .btn { padding:.6rem 1rem; background:#6b7280; color:#fff; border:none; border-radius:8px; cursor:pointer; text-decoration:none; display:inline-block; margin-right:.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Học: {{ set_name }}</h1>
+    <div class="info" id="info">Nhấn vào thẻ để lật xem nghĩa</div>
+    <div class="card" id="flashcard" onclick="flipCard()">
+      <div id="front"></div>
+    </div>
+    <div class="rating" id="rating" style="display:none;">
+      <p>Bạn nhớ từ này thế nào?</p>
+      <button class="fail" onclick="rate(0)">Quên hoàn toàn (0)</button>
+      <button class="fail" onclick="rate(1)">Sai nhiều (1)</button>
+      <button class="fail" onclick="rate(2)">Sai ít (2)</button>
+      <button class="hard" onclick="rate(3)">Khó (3)</button>
+      <button onclick="rate(4)">Tốt (4)</button>
+      <button onclick="rate(5)">Dễ (5)</button>
+    </div>
+    <div class="actions">
+      <button class="btn" id="correction-btn" style="display:none;">Sửa lỗi</button>
+      <a href="/sets/{{ set_id }}" class="btn">← Quay lại</a>
+    </div>
+  </div>
+<script>
+const setId = "{{ set_id }}";
+let currentTerm = null;
+let flipped = false;
+
+async function loadNext() {
+  const resp = await fetch('/api/next', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ set_id: setId })
+  });
+  const data = await resp.json();
+  if(!data.term){ 
+    document.getElementById('front').innerText = 'Đã hết từ! 🎉';
+    document.getElementById('rating').style.display = 'none';
+    return;
+  }
+  currentTerm = data.term;
+  flipped = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('front').innerHTML = `<div class="term">${currentTerm.term}</div><div class="pos">${currentTerm.pos || ''}</div>`;
+  document.getElementById('rating').style.display = 'none';
+  document.getElementById('correction-btn').style.display = 'none';
+  document.getElementById('info').innerText = 'Nhấn vào thẻ để lật xem nghĩa';
+}
+
+function flipCard() {
+  if(flipped) return;
+  flipped = true;
+  document.getElementById('flashcard').classList.add('flipped');
+  document.getElementById('front').innerHTML = `<div class="definition">${currentTerm.definition}</div>`;
+  document.getElementById('rating').style.display = 'block';
+  document.getElementById('correction-btn').style.display = 'inline-block';
+  document.getElementById('info').innerText = '';
+}
+
+async function rate(quality) {
+  const resp = await fetch('/api/answer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ term_id: currentTerm.id, rating: quality })
+  });
+  await resp.json();
+  loadNext();
+}
+
+document.getElementById('correction-btn').addEventListener('click', async function(){
+  if(!currentTerm) return;
+  const termInput = prompt('Nhập sửa cho từ (bỏ trống nếu muốn sửa nghĩa):');
+  let field = null;
+  let value = null;
+  if(termInput && termInput.trim()){
+    field = 'term';
+    value = termInput.trim();
+  } else {
+    const defInput = prompt('Nhập sửa cho nghĩa (bỏ trống để hủy):');
+    if(defInput && defInput.trim()){
+      field = 'definition';
+      value = defInput.trim();
+    }
+  }
+  if(!field) return;
+  await fetch('/api/correction', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ term_id: currentTerm.id, field: field, value: value })
+  });
+  alert('Gửi sửa lỗi thành công. Cảm ơn bạn!');
+  document.getElementById('correction-btn').style.display = 'none';
+});
+
+loadNext();
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Chọn chế độ học - {{ set_name }}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      color: white;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .mode-card {
+      background-color: rgba(17, 24, 39, 1);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      text-decoration: none;
+      color: rgba(243, 244, 246, 1);
+      transition: all 0.3s;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .mode-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(167, 139, 250, 1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .mode-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .mode-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: rgba(167, 139, 250, 1);
+    }
+
+    .mode-desc {
+      font-size: 0.95rem;
+      color: rgba(156, 163, 175, 1);
+      line-height: 1.5;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background-color: rgba(17, 24, 39, 0.8);
+      color: white;
+      text-decoration: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .back-btn:hover {
+      background-color: rgba(17, 24, 39, 1);
+      transform: translateX(-5px);
+    }
+
+    @media (max-width: 768px) {
+      .mode-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/sets/{{ set_id }}" class="back-btn">← Quay lại bộ từ</a>
+    
+    <div class="header">
+      <h1>Chọn chế độ học</h1>
+      <p>{{ set_name }}</p>
+    </div>
+
+    <div class="mode-grid">
+      <a href="/study/{{ set_id }}?mode=flashcard" class="mode-card">
+        <span class="mode-icon">🎴</span>
+        <div class="mode-title">Flashcard</div>
+        <div class="mode-desc">Lật thẻ xem nghĩa, tự đánh giá mức độ nhớ của bạn</div>
+      </a>
+
+      <a href="/study/{{ set_id }}?mode=fill" class="mode-card">
+        <span class="mode-icon">✏️</span>
+        <div class="mode-title">Điền từ</div>
+        <div class="mode-desc">Xem nghĩa, gõ từ vựng tiếng Anh chính xác</div>
+      </a>
+
+      <a href="/study/{{ set_id }}?mode=choice" class="mode-card">
+        <span class="mode-icon">📝</span>
+        <div class="mode-title">Trắc nghiệm</div>
+        <div class="mode-desc">Chọn nghĩa đúng trong 4 phương án</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

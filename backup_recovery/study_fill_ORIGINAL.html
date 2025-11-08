@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Điền từ - {{ set_name }}</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; background:#f9fafb; }
+    .container { max-width: 640px; margin: auto; text-align:center; }
+    h1 { margin-bottom: .5rem; }
+    .card { border:2px solid #e5e7eb; padding:2rem; border-radius:16px; margin:2rem 0; background:#fff; min-height:200px; display:flex; flex-direction:column; justify-content:center; }
+    .definition { font-size:1.4rem; margin-bottom:1.5rem; color:#1e40af; font-weight:600; }
+    .pos { font-size:1rem; color:#6b7280; margin-bottom:1rem; }
+    .input-area { margin-top:1rem; }
+    .input-area input { width:100%; padding:.8rem; font-size:1.2rem; border:2px solid #d1d5db; border-radius:8px; text-align:center; }
+    .input-area input:focus { outline:none; border-color:#2563eb; }
+    .feedback { margin-top:1rem; padding:.8rem; border-radius:8px; font-weight:600; }
+    .feedback.correct { background:#d1fae5; color:#065f46; }
+    .feedback.wrong { background:#fee2e2; color:#991b1b; }
+    .actions { margin-top:1rem; }
+    .btn { padding:.7rem 1.2rem; border:none; background:#2563eb; color:#fff; border-radius:8px; cursor:pointer; font-weight:600; margin:.3rem; }
+    .btn:disabled { background:#9ca3af; cursor:not-allowed; }
+    .info { color:#6b7280; margin:1rem 0; }
+    .score { font-size:1.1rem; font-weight:600; color:#2563eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✍️ Điền từ: {{ set_name }}</h1>
+    <div class="info">
+      <span class="score">Đúng: <span id="correct">0</span> | Sai: <span id="wrong">0</span></span>
+    </div>
+    
+    <div class="card" id="question-card">
+      <div class="pos" id="pos"></div>
+      <div class="definition" id="definition">Đang tải...</div>
+      <div class="input-area">
+        <input type="text" id="answer" placeholder="Nhập từ vựng tiếng Anh..." autocomplete="off" />
+      </div>
+      <div class="feedback" id="feedback" style="display:none;"></div>
+    </div>
+    
+    <div class="actions">
+      <button class="btn" id="check-btn" onclick="checkAnswer()">Kiểm tra</button>
+      <button class="btn" id="next-btn" onclick="loadNext()" style="display:none;">Tiếp theo</button>
+      <button class="btn" id="correction-btn" style="display:none;">Sửa lỗi</button>
+      <a href="/study/{{ set_id }}?mode=select" class="btn" style="background:#6b7280;">← Chọn chế độ khác</a>
+    </div>
+  </div>
+<script>
+const setId = "{{ set_id }}";
+let currentTerm = null;
+let correctCount = 0;
+let wrongCount = 0;
+
+async function loadNext() {
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('answer').value = '';
+  document.getElementById('answer').disabled = false;
+  document.getElementById('check-btn').style.display = 'inline-block';
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('correction-btn').style.display = 'none';
+  
+  const resp = await fetch('/api/next', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ set_id: setId })
+  });
+  const data = await resp.json();
+  if(!data.term){ 
+    document.getElementById('definition').innerText = 'Đã hết từ! 🎉';
+    document.getElementById('pos').innerText = '';
+    document.getElementById('answer').style.display = 'none';
+    document.getElementById('check-btn').style.display = 'none';
+    return;
+  }
+  currentTerm = data.term;
+  document.getElementById('definition').innerText = currentTerm.definition;
+  document.getElementById('pos').innerText = currentTerm.pos ? `(${currentTerm.pos})` : '';
+  document.getElementById('answer').focus();
+}
+
+function normalize(str) {
+  return str.trim().toLowerCase().replace(/[^\w\s]/g, '');
+}
+
+async function checkAnswer() {
+  const userAnswer = document.getElementById('answer').value.trim();
+  if(!userAnswer) return;
+  
+  const correct = normalize(userAnswer) === normalize(currentTerm.term);
+  const feedbackEl = document.getElementById('feedback');
+  
+  if(correct) {
+    correctCount++;
+    feedbackEl.className = 'feedback correct';
+    feedbackEl.innerHTML = `✅ <strong>Chính xác!</strong> "${currentTerm.term}"`;
+    await submitRating(5); // Auto rate as "easy" if correct
+  } else {
+    wrongCount++;
+    feedbackEl.className = 'feedback wrong';
+    feedbackEl.innerHTML = `❌ <strong>Sai rồi!</strong> Đáp án đúng: <strong>"${currentTerm.term}"</strong>`;
+    await submitRating(0); // Auto rate as "forgot" if wrong
+    document.getElementById('correction-btn').style.display = 'inline-block';
+  }
+  
+  document.getElementById('correct').innerText = correctCount;
+  document.getElementById('wrong').innerText = wrongCount;
+  feedbackEl.style.display = 'block';
+  document.getElementById('answer').disabled = true;
+  document.getElementById('check-btn').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'inline-block';
+}
+
+async function submitRating(quality) {
+  await fetch('/api/answer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ term_id: currentTerm.id, rating: quality })
+  });
+}
+
+document.getElementById('answer').addEventListener('keypress', (e) => {
+  if(e.key === 'Enter' && !document.getElementById('answer').disabled) {
+    checkAnswer();
+  }
+});
+
+document.getElementById('correction-btn').addEventListener('click', async function(){
+  if(!currentTerm) return;
+  const termInput = prompt('Nhập sửa cho từ (bỏ trống nếu muốn sửa nghĩa):');
+  let field = null;
+  let value = null;
+  if(termInput && termInput.trim()){
+    field = 'term';
+    value = termInput.trim();
+  } else {
+    const defInput = prompt('Nhập sửa cho nghĩa (bỏ trống để hủy):');
+    if(defInput && defInput.trim()){
+      field = 'definition';
+      value = defInput.trim();
+    }
+  }
+  if(!field) return;
+  await fetch('/api/correction', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ term_id: currentTerm.id, field: field, value: value })
+  });
+  alert('Gửi sửa lỗi thành công. Cảm ơn bạn!');
+  document.getElementById('correction-btn').style.display = 'none';
+});
+
+loadNext();
+</script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Chi tiết bộ từ</title>
+  <link rel="stylesheet" href="/static/base.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+    .top-header {
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 20px;
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .logo {
+      font-size: 1.8em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    .nav-icons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .nav-btn {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95em;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .nav-btn:hover {
+      background: #f0f2f5;
+    }
+    .nav-btn.active {
+      color: #667eea;
+      font-weight: 600;
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1em;
+    }
+    .container { max-width: 1000px; margin: 2rem auto; padding: 0 2rem; }
+    .header-card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .header-card h1 {
+      font-size: 2em;
+      color: #050505;
+      margin: 0 0 0.5rem 0;
+    }
+    .description { 
+      color: #65676b; 
+      margin-bottom: 0.5rem;
+    }
+    .meta { 
+      color: #65676b; 
+      font-size: 0.95rem; 
+      margin-bottom: 1.5rem;
+    }
+    .actions { 
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .btn {
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      font-size: 0.9rem;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    .btn-ghost {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+      box-shadow: none;
+    }
+    .btn-ghost:hover {
+      background: #667eea;
+      color: white;
+    }
+    .btn-danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+    .btn-success {
+      background: linear-gradient(135deg, #10b981, #059669);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+    .section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      font-size: 1.5em;
+      color: #050505;
+      margin: 0 0 1rem 0;
+    }
+    .add-term-form {
+      background: #f9fafb;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 2fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-group label {
+      font-weight: 600;
+      color: #050505;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .form-group input,
+    .form-group textarea {
+      padding: 0.6rem 0.8rem;
+      border: 2px solid #e4e6eb;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e4e6eb;
+    }
+    th {
+      background: #f7f8fa;
+      font-weight: 600;
+      color: #050505;
+      font-size: 0.9rem;
+    }
+    tr:hover {
+      background: #f9fafb;
+    }
+    .term-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .btn-small {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+    .status-col .badge {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #65676b;
+    }
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 1rem;
+      }
+      .actions {
+        grid-template-columns: 1fr;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      table {
+        font-size: 0.85rem;
+      }
+      th, td {
+        padding: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-header">
+    <div class="header-content">
+      <a href="/" class="logo">VocabApp</a>
+      <div class="nav-icons">
+        <a href="/feed" class="nav-btn">🏠 Feed</a>
+        <a href="/sets" class="nav-btn active">📚 Bộ từ của tôi</a>
+        <a href="/dashboard" class="nav-btn">📊 Thống kê</a>
+        <a href="/profile" class="nav-btn" title="Tài khoản">
+          {% if user and user.avatar %}
+            <img src="{{ user.avatar }}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;" />
+          {% else %}
+            <div class="user-avatar" title="{{ username }}">{{ username[0].upper() }}</div>
+          {% endif %}
+        </a>
+        <a href="/logout" class="nav-btn" style="color:#ef4444;">Đăng xuất</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="header-card">
+      <h1>📖 {{ vset.name }}</h1>
+      <p class="description">{{ vset.description or 'Không có mô tả' }}</p>
+      <p class="meta"><strong>Ngôn ngữ:</strong> {{ vset.language_from }} → {{ vset.language_to }}</p>
+      
+      <div class="actions">
+        <a href="/sets" class="btn btn-ghost">← Quay lại</a>
+        <a href="/study/{{ vset.id }}?mode=select" class="btn">🎯 Học ngay</a>
+        <a href="/sets/{{ vset.id }}/export?format=csv" class="btn" style="background: linear-gradient(135deg,#06b6d4,#0ea5e9);">💾 CSV</a>
+        <a href="/sets/{{ vset.id }}/export?format=xlsx" class="btn" style="background: linear-gradient(135deg,#8b5cf6,#a78bfa);">📊 Excel</a>
+        <a href="/sets/{{ vset.id }}/edit" class="btn" style="background: linear-gradient(135deg,#f59e0b,#fbbf24);">✏️ Sửa</a>
+        {% if vset.visibility == 'public' %}
+        <form method="post" action="/sets/{{ vset.id }}/publish" style="grid-column: span 1;">
+          <button type="submit" class="btn" style="width:100%;background: linear-gradient(135deg,#10b981,#059669);">🔓 Public</button>
+        </form>
+        {% else %}
+        <form method="post" action="/sets/{{ vset.id }}/publish" style="grid-column: span 1;">
+          <button type="submit" class="btn" style="width:100%;background: linear-gradient(135deg,#6b7280,#4b5563);">🔒 Private</button>
+        </form>
+        {% endif %}
+        <form method="post" action="/sets/{{ vset.id }}/delete" style="grid-column: span 1;" 
+              onsubmit="return confirm('⚠️ Xóa bộ từ này và TẤT CẢ từ vựng bên trong?\n\nHành động này không thể hoàn tác!');">
+          <button type="submit" class="btn btn-danger" style="width:100%;">🗑️ Xóa</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>➕ Thêm từ mới</h2>
+      <form method="post" action="/sets/{{ vset.id }}/add-term" class="add-term-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Từ vựng *</label>
+            <input type="text" name="term" required placeholder="Ví dụ: window shopping" />
+          </div>
+          <div class="form-group">
+            <label>Loại từ</label>
+            <input type="text" name="pos" placeholder="n., v., adj., ..." />
+          </div>
+          <div class="form-group">
+            <label>Nghĩa *</label>
+            <input type="text" name="definition" required placeholder="Đi dạo ngắm đồ..." />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Ví dụ (không bắt buộc)</label>
+          <textarea name="example" placeholder="Câu ví dụ sử dụng từ này..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-success" style="margin-top: 1rem;">➕ Thêm từ</button>
+      </form>
+
+      <h2>📚 Danh sách từ vựng ({{ terms|length }})</h2>
+      
+      <div style="margin-bottom: 1rem;">
+        <input type="text" id="searchTerms" placeholder="🔍 Tìm kiếm từ vựng..." 
+               style="width: 100%; padding: 0.7rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem;"
+               onkeyup="filterTerms()" />
+      </div>
+      
+      {% if terms %}
+      <table>
+        <thead>
+          <tr>
+            <th style="width:16%;">Thuật ngữ</th>
+            <th style="width:8%;">Loại từ</th>
+            <th style="width:28%;">Định nghĩa</th>
+            <th style="width:18%;">Ví dụ</th>
+            <th style="width:12%;">Ghi chú</th>
+            <th style="width:8%;">Trạng thái</th>
+            <th style="width:10%;">Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in terms %}
+          <tr>
+            <td style="font-weight:600;">{{ t.term }}</td>
+            <td style="font-size:.85rem;color:#667eea;font-weight:600;">{{ t.pos or '-' }}</td>
+            <td>{{ t.definition }}</td>
+            <td style="font-size:.85rem;color:#65676b;">{{ t.example or '-' }}</td>
+            <td style="font-size:.85rem;color:#65676b;">{{ t.note or '-' }}</td>
+            <td class="status-col">{% if t.status %}<span class="badge badge-success">{{ t.status }}</span>{% else %}<span class="badge">Chưa rõ</span>{% endif %}</td>
+            <td>
+              <div class="term-actions">
+                <a href="/sets/{{ vset.id }}/terms/{{ t.id }}/edit" class="btn-ghost btn-small">Sửa</a>
+                <a href="/study/{{ vset.id }}?mode=select&focus={{ t.id }}" class="btn-ghost btn-small">Học</a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state">
+        <p>Chưa có thuật ngữ nào trong bộ từ này.</p>
+      </div>
+      {% endif %}
+    </div>
+    
+    <script>
+    function filterTerms() {
+      const input = document.getElementById('searchTerms');
+      const filter = input.value.toLowerCase();
+      const table = document.querySelector('tbody');
+      const rows = table ? table.getElementsByTagName('tr') : [];
+      
+      for (let i = 0; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName('td');
+        let found = false;
+        for (let j = 0; j < cells.length; j++) {
+          if (cells[j].textContent.toLowerCase().indexOf(filter) > -1) {
+            found = true;
+            break;
+          }
+        }
+        rows[i].style.display = found ? '' : 'none';
+      }
+    }
+    </script>
+  </div>
+  
+  <script>
+    // AI Assistant Functions (removed for now - can be added back if needed)
+  </script>
+</body>
+</html>

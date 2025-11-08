@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Trắc nghiệm - {{ set_name }}</title>
+  <link rel="stylesheet" href="/static/base.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+    .top-header {
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 20px;
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .logo {
+      font-size: 1.8em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    .nav-icons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .nav-btn {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95em;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .nav-btn:hover {
+      background: #f0f2f5;
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1em;
+    }
+    .term { font-size:2rem; font-weight:800; margin-bottom:.5rem; color:#050505; }
+    .pos { font-size:1rem; color:#65676b; margin-bottom:1rem; }
+    .choice { padding:1rem; margin:.5rem 0; border:2px solid #e4e6eb; border-radius:12px; cursor:pointer; background:white; transition:all 0.2s; font-size:1.05rem; }
+    .choice:hover { border-color:#667eea; background:rgba(102,126,234,0.06); }
+    .choice.correct { border-color:#10b981; background:rgba(16,185,129,0.15); color:#10b981; }
+    .choice.wrong { border-color:#ef4444; background:rgba(239,68,68,0.15); color:#ef4444; }
+    .choice.disabled { cursor:not-allowed; opacity:0.8; }
+    .feedback { margin-top:1rem; padding:.9rem; border-radius:12px; font-weight:700; }
+    .feedback.correct { background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.35); }
+    .feedback.wrong { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.35); }
+  </style>
+</head>
+<body>
+  <div class="top-header">
+    <div class="header-content">
+      <a href="/" class="logo">VocabApp</a>
+      <div class="nav-icons">
+        <a href="/feed" class="nav-btn">🏠 Feed</a>
+        <a href="/sets" class="nav-btn">📚 Bộ từ của tôi</a>
+        <a href="/dashboard" class="nav-btn">📊 Thống kê</a>
+        <a href="/study/{{ set_id }}?mode=select" class="nav-btn">🔄 Đổi chế độ</a>
+        <a href="/profile" class="nav-btn" title="Tài khoản">
+          {% if user and user.avatar %}
+            <img src="{{ user.avatar }}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;" />
+          {% else %}
+            <div class="user-avatar" title="{{ username }}">{{ username[0].upper() }}</div>
+          {% endif %}
+        </a>
+        <a href="/logout" class="nav-btn" style="color:#ef4444;">Đăng xuất</a>
+      </div>
+    </div>
+  </div>
+  <main style="max-width:760px;margin:0 auto;padding:1rem;text-align:center;">
+    <div class="header-card">
+  <h1 style="margin:0 0 .25rem 0;">Trắc nghiệm: {{ set_name }}</h1>
+      <div class="muted">Chọn nghĩa đúng trong các phương án</div>
+      <div style="margin-top:.5rem;font-weight:600;">Đúng: <span id="correct">0</span> | Sai: <span id="wrong">0</span></div>
+    </div>
+    <div class="card" id="question-card">
+      <div class="term" id="term">Đang tải...</div>
+      <div class="pos" id="pos"></div>
+      <div id="choices"></div>
+      <div class="feedback" id="feedback" style="display:none;"></div>
+      <div style="margin-top:1rem;">
+        <button style="padding:10px 20px;background:#10b981;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;display:none;" id="next-btn" onclick="loadNext()">Tiếp theo</button>
+      </div>
+    </div>
+  </main>
+<script>
+const setId = "{{ set_id }}";
+let currentTerm = null;
+let currentChoices = [];
+let correctCount = 0;
+let wrongCount = 0;
+let answered = false;
+
+async function loadNext() {
+  answered = false;
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+  
+  const resp = await fetch('/api/choice', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ set_id: setId })
+  });
+  const data = await resp.json();
+  if(!data.term){ 
+    document.getElementById('term').innerText = 'Đã hết từ! 🎉';
+    document.getElementById('pos').innerText = '';
+    document.getElementById('choices').innerHTML = '';
+    return;
+  }
+  currentTerm = data.term;
+  currentChoices = data.choices;
+  
+  document.getElementById('term').innerText = currentTerm.term;
+  document.getElementById('pos').innerText = currentTerm.pos ? `(${currentTerm.pos})` : '';
+  
+  // Render choices
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = currentChoices.map((c) => 
+    `<div class=\"choice\" onclick=\"selectChoice('${c.id}')\" id=\"choice-${c.id}\">${c.definition}</div>`
+  ).join('');
+}
+
+async function selectChoice(choiceId) {
+  if(answered) return;
+  answered = true;
+  
+  const correct = choiceId === currentTerm.id;
+  const feedbackEl = document.getElementById('feedback');
+  
+  // Highlight selected and correct answer
+  currentChoices.forEach(c => {
+    const el = document.getElementById(`choice-${c.id}`);
+    el.classList.add('disabled');
+    if(c.id === choiceId) {
+      el.classList.add(correct ? 'correct' : 'wrong');
+    }
+    if(c.id === currentTerm.id && !correct) {
+      el.classList.add('correct');
+    }
+  });
+  
+  if(correct) {
+    correctCount++;
+    feedbackEl.className = 'feedback correct';
+    feedbackEl.innerHTML = `✅ <strong>Chính xác!</strong>`;
+    await submitRating(5);
+  } else {
+    wrongCount++;
+    feedbackEl.className = 'feedback wrong';
+    feedbackEl.innerHTML = `❌ <strong>Sai rồi!</strong> Đáp án đúng là: <strong>"${currentTerm.definition}"</strong>`;
+    await submitRating(1);
+  }
+  
+  document.getElementById('correct').innerText = correctCount;
+  document.getElementById('wrong').innerText = wrongCount;
+  feedbackEl.style.display = 'block';
+  document.getElementById('next-btn').style.display = 'inline-block';
+}
+
+async function submitRating(quality) {
+  await fetch('/api/answer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ term_id: currentTerm.id, rating: quality })
+  });
+}
+
+loadNext();
+</script>
+</body>
+</html>

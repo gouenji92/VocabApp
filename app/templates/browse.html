@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Sets - VocabApp</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/base.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+        
+        .top-header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .nav-btn.active {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 12px 24px;
+            background: white;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .filters {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-filter {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .sets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .set-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .set-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .set-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .set-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .set-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            min-height: 40px;
+        }
+
+        .set-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .meta-badge.lang {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .meta-badge.owner {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .set-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-clone {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-clone:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-preview {
+            padding: 12px 20px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-preview:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .empty-state {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state h2 {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8em;
+            color: #333;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        .btn-close:hover {
+            color: #333;
+        }
+
+        .term-list {
+            list-style: none;
+        }
+
+        .term-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .term-item:last-child {
+            border-bottom: none;
+        }
+
+        .term-word {
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .term-def {
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .filters form {
+                grid-template-columns: 1fr;
+            }
+
+            .sets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-header">
+        <div class="header-content">
+            <a href="/" class="logo">VocabApp</a>
+            <div class="nav-icons">
+                <a href="/feed" class="nav-btn">🏠 Feed</a>
+                <a href="/sets" class="nav-btn">📚 Bộ từ của tôi</a>
+                <a href="/dashboard" class="nav-btn">📊 Thống kê</a>
+                <a href="/profile" class="nav-btn" title="Tài khoản">
+                    {% if user and user.avatar %}
+                        <img src="{{ user.avatar }}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;" />
+                    {% else %}
+                        <div class="user-avatar" title="{{ username }}">{{ username[0].upper() }}</div>
+                    {% endif %}
+                </a>
+                <a href="/logout" class="nav-btn" style="color:#ef4444;">Đăng xuất</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <a href="/sets" class="nav-back">← Quay lại bộ từ</a>
+
+        <div style="background:white;border-radius:12px;padding:30px;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+            <h1 style="font-size:2em;color:#050505;margin-bottom:8px;">🌍 Bộ từ vựng của cộng đồng</h1>
+            <p style="color:#65676b;font-size:1em;">Khám phá và sao chép bộ từ vựng được chia sẻ bởi người học khác</p>
+        </div>
+
+        <div class="filters">
+            <form method="GET">
+                <div class="filter-group">
+                    <label>Search</label>
+                    <input type="text" name="search" placeholder="Search sets..." value="{{ search or '' }}">
+                </div>
+                <div class="filter-group">
+                    <label>From Language</label>
+                    <select name="language_from">
+                        <option value="">All</option>
+                        <option value="en" {% if language_from == 'en' %}selected{% endif %}>English</option>
+                        <option value="vi" {% if language_from == 'vi' %}selected{% endif %}>Vietnamese</option>
+                        <option value="es" {% if language_from == 'es' %}selected{% endif %}>Spanish</option>
+                        <option value="fr" {% if language_from == 'fr' %}selected{% endif %}>French</option>
+                        <option value="de" {% if language_from == 'de' %}selected{% endif %}>German</option>
+                        <option value="ja" {% if language_from == 'ja' %}selected{% endif %}>Japanese</option>
+                        <option value="ko" {% if language_from == 'ko' %}selected{% endif %}>Korean</option>
+                        <option value="zh" {% if language_from == 'zh' %}selected{% endif %}>Chinese</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>To Language</label>
+                    <select name="language_to">
+                        <option value="">All</option>
+                        <option value="en" {% if language_to == 'en' %}selected{% endif %}>English</option>
+                        <option value="vi" {% if language_to == 'vi' %}selected{% endif %}>Vietnamese</option>
+                        <option value="es" {% if language_to == 'es' %}selected{% endif %}>Spanish</option>
+                        <option value="fr" {% if language_to == 'fr' %}selected{% endif %}>French</option>
+                        <option value="de" {% if language_to == 'de' %}selected{% endif %}>German</option>
+                        <option value="ja" {% if language_to == 'ja' %}selected{% endif %}>Japanese</option>
+                        <option value="ko" {% if language_to == 'ko' %}selected{% endif %}>Korean</option>
+                        <option value="zh" {% if language_to == 'zh' %}selected{% endif %}>Chinese</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-filter">🔍 Filter</button>
+            </form>
+        </div>
+
+        {% if sets %}
+        <div class="sets-grid">
+            {% for set in sets %}
+            <div class="set-card">
+                <div class="set-title">{{ set.name }}</div>
+                <div class="set-description">{{ set.description or 'No description' }}</div>
+                <div class="set-meta">
+                    <span class="meta-badge">📚 {{ set.term_count }} terms</span>
+                    <span class="meta-badge lang">{{ set.language_from }} → {{ set.language_to }}</span>
+                    {% if set.owner_username %}
+                    <span class="meta-badge owner">👤 {{ set.owner_username }}</span>
+                    {% endif %}
+                </div>
+                <div class="set-actions">
+                    <button class="btn-clone" onclick="cloneSet('{{ set.id }}', '{{ set.name }}')">
+                        📥 Copy to My Sets
+                    </button>
+                    <button class="btn-preview" onclick="previewSet('{{ set.id }}')">
+                        👁️ Preview
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <h2>🔍 No sets found</h2>
+            <p>Try adjusting your search filters or be the first to share a vocabulary set!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Preview</h2>
+                <button class="btn-close" onclick="closeModal()">&times;</button>
+            </div>
+            <ul id="termsList" class="term-list">
+                <!-- Terms will be loaded here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function previewSet(setId) {
+            try {
+                const response = await fetch(`/api/sets/${setId}/terms`);
+                const terms = await response.json();
+                
+                const modal = document.getElementById('previewModal');
+                const termsList = document.getElementById('termsList');
+                const modalTitle = document.getElementById('modalTitle');
+                
+                // Find set name
+                const setCard = event.target.closest('.set-card');
+                const setName = setCard.querySelector('.set-title').textContent;
+                modalTitle.textContent = setName;
+                
+                termsList.innerHTML = terms.map(term => `
+                    <li class="term-item">
+                        <div class="term-word">${term.term}</div>
+                        <div class="term-def">${term.definition}</div>
+                        ${term.example ? `<div style="color: #999; font-style: italic; margin-top: 5px;">"${term.example}"</div>` : ''}
+                    </li>
+                `).join('');
+                
+                modal.classList.add('active');
+            } catch (error) {
+                alert('Failed to load preview');
+            }
+        }
+
+        async function cloneSet(setId, setName) {
+            if (!confirm(`Copy "${setName}" to your collection?`)) return;
+            
+            try {
+                const response = await fetch(`/api/sets/${setId}/clone`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('✅ Set copied successfully!');
+                    window.location.href = '/sets';
+                } else {
+                    alert('❌ Failed to copy set');
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('previewModal').classList.remove('active');
+        }
+
+        // Close modal on outside click
+        document.getElementById('previewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

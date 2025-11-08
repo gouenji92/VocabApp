@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Học từ vựng - {{ set_name }}</title>
+  <link rel="stylesheet" href="/static/base.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+    .top-header {
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 20px;
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .logo {
+      font-size: 1.8em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    .nav-icons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .nav-btn {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95em;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .nav-btn:hover {
+      background: #f0f2f5;
+    }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1em;
+    }
+    .study-card { 
+      min-height: 280px; 
+      display:flex; 
+      flex-direction:column; 
+      justify-content:center; 
+      align-items:center; 
+      cursor:pointer;
+      transition: all 0.3s ease;
+    }
+    .study-card.flipped { 
+      background: linear-gradient(135deg, #667eea, #764ba2); 
+      color:#fff;
+    }
+    .term { 
+      font-size:2.2rem; 
+      font-weight:800; 
+      color:#050505;
+      margin-bottom:0.5rem;
+    }
+    .study-card.flipped .term {
+      color: #fff;
+    }
+    .definition { 
+      font-size:1.5rem; 
+      margin-top:1rem; 
+      color:#fff;
+      line-height: 1.5;
+    }
+    .pos { 
+      font-size:1rem; 
+      color:#65676b; 
+      margin-top:.5rem;
+    }
+    .study-card.flipped .pos {
+      color: rgba(255,255,255,0.9);
+    }
+    .rating-btn {
+      padding: 12px 20px;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+      min-width: 140px;
+    }
+    .rating-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .rating-btn.danger {
+      background: #ef4444;
+    }
+    .rating-btn.warning {
+      background: #f59e0b;
+    }
+    .rating-btn.success {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    @media (max-width: 768px) {
+      .term { font-size: 1.8rem; }
+      .definition { font-size: 1.2rem; }
+      .rating-btn {
+        min-width: 110px;
+        padding: 10px 16px;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-header">
+    <div class="header-content">
+      <a href="/" class="logo">VocabApp</a>
+      <div class="nav-icons">
+        <a href="/feed" class="nav-btn">🏠 Feed</a>
+        <a href="/sets" class="nav-btn">📚 Bộ từ của tôi</a>
+        <a href="/dashboard" class="nav-btn">📊 Thống kê</a>
+        <a href="/sets/{{ set_id }}" class="nav-btn">↩️ Quay lại bộ từ</a>
+        <a href="/profile" class="nav-btn" title="Tài khoản">
+          {% if user and user.avatar %}
+            <img src="{{ user.avatar }}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;" />
+          {% else %}
+            <div class="user-avatar" title="{{ username }}">{{ username[0].upper() }}</div>
+          {% endif %}
+        </a>
+        <a href="/logout" class="nav-btn" style="color:#ef4444;">Đăng xuất</a>
+      </div>
+    </div>
+  </div>
+  <main style="max-width: 720px; margin: 20px auto; padding: 0 20px; text-align:center;">
+    <div style="background:white;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,0.1);">
+      <h1 style="margin:0 0 .25rem 0;color:#050505;">🎴 Học: {{ set_name }}</h1>
+      <div style="color:#65676b;" id="info">Nhấn vào thẻ để lật xem nghĩa</div>
+    </div>
+    <div style="background:white;border-radius:12px;padding:30px;box-shadow:0 1px 2px rgba(0,0,0,0.1);" class="study-card" id="flashcard" onclick="flipCard()">
+      <div id="front"></div>
+    </div>
+    <div style="background:white;border-radius:12px;padding:30px;box-shadow:0 1px 2px rgba(0,0,0,0.1);margin-top:20px;display:none;" id="rating">
+      <p style="margin:0 0 1rem 0;color:#050505;font-weight:600;font-size:1.05rem;">Bạn nhớ từ này thế nào?</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;max-width:700px;margin:0 auto;">
+        <button class="rating-btn danger" onclick="rate(0)">❌ Quên (0)</button>
+        <button class="rating-btn danger" onclick="rate(1)">😰 Sai nhiều (1)</button>
+        <button class="rating-btn danger" onclick="rate(2)">😅 Sai ít (2)</button>
+        <button class="rating-btn warning" onclick="rate(3)">🤔 Khó (3)</button>
+        <button class="rating-btn success" onclick="rate(4)">👍 Tốt (4)</button>
+        <button class="rating-btn success" onclick="rate(5)">🌟 Dễ (5)</button>
+      </div>
+    </div>
+  </main>
+  <script>
+const setId = "{{ set_id }}";
+let currentTerm = null;
+let flipped = false;
+
+async function loadNext() {
+  const resp = await fetch('/api/next', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ set_id: setId })
+  });
+  const data = await resp.json();
+  if(!data.term){ 
+    document.getElementById('front').innerText = 'Đã hết từ! 🎉';
+    document.getElementById('rating').style.display = 'none';
+    return;
+  }
+  currentTerm = data.term;
+  flipped = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  document.getElementById('front').innerHTML = `<div class="term">${currentTerm.term}</div><div class="pos">${currentTerm.pos || ''}</div>`;
+  document.getElementById('rating').style.display = 'none';
+  document.getElementById('info').innerText = 'Nhấn vào thẻ để lật xem nghĩa';
+}
+
+function flipCard() {
+  if(flipped) return;
+  flipped = true;
+  document.getElementById('flashcard').classList.add('flipped');
+  document.getElementById('front').innerHTML = `<div class="definition">${currentTerm.definition}</div>`;
+  document.getElementById('rating').style.display = 'block';
+  document.getElementById('info').innerText = '';
+}
+
+async function rate(quality) {
+  const resp = await fetch('/api/answer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ term_id: currentTerm.id, rating: quality })
+  });
+  await resp.json();
+  loadNext();
+}
+
+loadNext();
+  </script>
+</body>
+</html>

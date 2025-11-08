@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Chi tiết bộ từ</title>
+  <link rel="stylesheet" href="/static/base.css">
+  <style>
+    .container { max-width: 1000px; margin: 2rem auto; padding: 0 2rem; }
+    .description { color: var(--muted); }
+    .meta { color: var(--muted); font-size: 0.95rem; }
+    .btn-small { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
+    table { width:100%; border-collapse:collapse; margin-top:1rem; }
+    th, td { border:1px solid var(--border); padding:.8rem; text-align:left; }
+    th { background:var(--bg); font-weight:600; }
+    .add-term-form { background: var(--bg); border: 2px dashed #cbd5e1; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-container" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+      <a href="/" class="nav-logo" style="color:#fff;text-decoration:none;font-weight:700;">📚 VocabApp</a>
+      <div class="nav-links" style="display:flex;gap:1rem;align-items:center;">
+        <a href="/dashboard" style="color:#fff;text-decoration:none;">📊 Dashboard</a>
+        <a href="/" style="color:#fff;text-decoration:none;">📤 Upload</a>
+        <a href="/sets" style="color:#fff;text-decoration:none;">📖 Bộ từ của tôi</a>
+        <span class="user-badge">👤 {{ username }}</span>
+        <a href="/logout" style="color: #fca5a5;">Đăng xuất</a>
+      </div>
+    </div>
+  </header>
+  
+  <div class="container">
+    <div class="header-card">
+      <h1>📖 {{ vset.name }}</h1>
+      <p class="description">{{ vset.description or 'Không có mô tả' }}</p>
+      <p class="meta"><strong>Ngôn ngữ:</strong> {{ vset.language_from }} → {{ vset.language_to }}</p>
+      
+      <div class="actions">
+  <a href="/sets" class="btn btn-ghost">← Quay lại</a>
+  <a href="/study/{{ vset.id }}?mode=select" class="btn">🎯 Học ngay</a>
+  <a href="/sets/{{ vset.id }}/export?format=csv" class="btn" style="background: linear-gradient(90deg,#06b6d4,#0ea5e9);">💾 Export CSV</a>
+  <a href="/sets/{{ vset.id }}/export?format=xlsx" class="btn" style="background: linear-gradient(90deg,#8b5cf6,#a78bfa);">📊 Export Excel</a>
+  <a href="/sets/{{ vset.id }}/edit" class="btn" style="background: linear-gradient(90deg,#f59e0b,#fbbf24);">✏️ Sửa bộ từ</a>
+        <form method="post" action="/sets/{{ vset.id }}/delete" style="display:inline;" 
+              onsubmit="return confirm('⚠️ Xóa bộ từ này và TẤT CẢ từ vựng bên trong?\n\nHành động này không thể hoàn tác!');">
+          <button type="submit" class="btn btn-danger">🗑️ Xóa bộ từ</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>➕ Thêm từ mới</h2>
+      <form method="post" action="/sets/{{ vset.id }}/add-term" class="add-term-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Từ vựng *</label>
+            <input type="text" name="term" required placeholder="Ví dụ: window shopping" />
+          </div>
+          <div class="form-group">
+            <label>Loại từ</label>
+            <input type="text" name="pos" placeholder="n., v., adj., ..." />
+          </div>
+          <div class="form-group">
+            <label>Nghĩa *</label>
+            <input type="text" name="definition" required placeholder="Đi dạo ngắm đồ..." />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Ví dụ (không bắt buộc)</label>
+          <textarea name="example" placeholder="Câu ví dụ sử dụng từ này..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-success" style="margin-top: 1rem;">➕ Thêm từ</button>
+      </form>
+
+      <h2>📚 Danh sách từ vựng ({{ terms|length }})</h2>
+      
+      <div style="margin-bottom: 1rem;">
+        <input type="text" id="searchTerms" placeholder="🔍 Tìm kiếm từ vựng..." 
+               style="width: 100%; padding: 0.7rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem;"
+               onkeyup="filterTerms()" />
+      </div>
+      
+      <!doctype html>
+      <html lang="vi">
+      <head>
+        <meta charset="utf-8" />
+        <title>Chi tiết bộ từ</title>
+        <link rel="stylesheet" href="/static/base.css">
+        <style>
+          .container { max-width: 1100px; margin: 0 auto; padding: 1rem 1.25rem 2rem; }
+          table { width: 100%; border-collapse: collapse; margin-top: .5rem; }
+          th, td { padding: .55rem .65rem; border-bottom: 1px solid var(--border); text-align:left; vertical-align:top; }
+          th { background: var(--panel); font-weight:600; font-size:.8rem; letter-spacing:.03em; }
+          tr:hover { background: var(--panel-hover); }
+          .term-actions { display:flex; gap:.4rem; flex-wrap:wrap; }
+          .top-actions { display:flex; gap:.6rem; flex-wrap:wrap; margin:1rem 0 1.1rem; }
+          .status-col span { font-size:.65rem; }
+        </style>
+      </head>
+      <body>
+        <header>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+            <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;">
+              <a href="/" style="color:#fff;">VocabApp</a>
+            </div>
+            <nav style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+              <a href="/dashboard">Dashboard</a>
+              <a href="/">Upload</a>
+              <a href="/sets">Bộ từ</a>
+              <span class="badge badge-info" style="background:rgba(255,255,255,0.25);border-color:rgba(255,255,255,0.35);color:#fff;">👤 {{ username }}</span>
+              <a href="/logout" style="color:#fee2e2;">Đăng xuất</a>
+              <button class="btn-ghost" onclick="toggleTheme()" title="Đổi giao diện">Giao diện</button>
+            </nav>
+          </div>
+        </header>
+        <div class="container">
+          <div class="header-card" style="margin:1rem 0 .75rem;">
+            <h1 style="margin:0 0 .35rem;">{{ set.name }}</h1>
+            <p class="muted" style="margin:0;">{{ set.description }}</p>
+          </div>
+          <div class="top-actions">
+            <a href="/study/{{ set.id }}?mode=select" class="btn">Học (tự do)</a>
+            <a href="/study/{{ set.id }}?mode=choice" class="btn-ghost">Trắc nghiệm</a>
+            <a href="/study/{{ set.id }}?mode=fill" class="btn-ghost">Điền khuyết</a>
+            <a href="/sets/{{ set.id }}/edit" class="btn-ghost">Sửa bộ từ</a>
+            <a href="/" class="btn-ghost">Tải bộ mới</a>
+            <a href="/sets" class="btn-ghost">Quay lại danh sách</a>
+          </div>
+          <div class="card" style="margin-bottom:1rem;">
+            <div style="display:flex;flex-wrap:wrap;gap:1.25rem;">
+              <div>
+                <div class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;">Ngôn ngữ</div>
+                <div style="font-weight:600;margin-top:.25rem;">{{ set.language_from }} → {{ set.language_to }}</div>
+              </div>
+              <div>
+                <div class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;">Tổng số thuật ngữ</div>
+                <div style="font-weight:600;margin-top:.25rem;">{{ terms|length }}</div>
+              </div>
+            </div>
+          </div>
+    
+          {% if terms %}
+          <div class="card" style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:18%;">Thuật ngữ</th>
+                  <th style="width:32%;">Định nghĩa</th>
+                  <th style="width:20%;">Ví dụ</th>
+                  <th style="width:15%;">Ghi chú</th>
+                  <th style="width:7%;">Trạng thái</th>
+                  <th style="width:8%;">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in terms %}
+                <tr>
+                  <td style="font-weight:600;">{{ t.term }}</td>
+                  <td>{{ t.definition }}</td>
+                  <td style="font-size:.8rem;color:var(--text-muted);">{{ t.example }}</td>
+                  <td style="font-size:.8rem;color:var(--text-muted);">{{ t.note }}</td>
+                  <td class="status-col">{% if t.status %}<span class="badge badge-success">{{ t.status }}</span>{% else %}<span class="badge">Chưa rõ</span>{% endif %}</td>
+                  <td>
+                    <div class="term-actions">
+                      <a href="/sets/{{ set.id }}/terms/{{ t.id }}/edit" class="btn-ghost">Sửa</a>
+                      <a href="/study/{{ set.id }}?mode=select&focus={{ t.id }}" class="btn-ghost">Học</a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <p>Chưa có thuật ngữ nào trong bộ từ này.</p>
+          </div>
+          {% endif %}
+        </div>
+    </div>
+    
+    <div class="ai-content">
+      <!-- Translate Tab -->
+      <div class="ai-tab-content active" id="tab-translate">
+        <div class="ai-input-group">
+          <label>Văn bản cần dịch:</label>
+          <textarea id="translateText" placeholder="Nhập từ hoặc câu..."></textarea>
+        </div>
+        <div class="ai-input-group">
+          <label>Hướng dịch:</label>
+          <select id="translateDir">
+            <option value="en-vi">Anh → Việt</option>
+            <option value="vi-en">Việt → Anh</option>
+          </select>
+        </div>
+        <button class="ai-btn" onclick="doTranslate()">Dịch ngay</button>
+        <div class="ai-result" id="translateResult"></div>
+      </div>
+      
+      <!-- Grammar Tab -->
+      <div class="ai-tab-content" id="tab-grammar">
+        <div class="ai-input-group">
+          <label>Văn bản cần kiểm tra:</label>
+          <textarea id="grammarText" placeholder="Nhập câu tiếng Anh..."></textarea>
+        </div>
+        <button class="ai-btn" onclick="doGrammar()">Kiểm tra ngữ pháp</button>
+        <div class="ai-result" id="grammarResult"></div>
+      </div>
+      
+      <!-- Example Tab -->
+      <div class="ai-tab-content" id="tab-example">
+        <div class="ai-input-group">
+          <label>Từ vựng:</label>
+          <input type="text" id="exampleWord" placeholder="Ví dụ: happy" />
+        </div>
+        <div class="ai-input-group">
+          <label>Loại từ (tùy chọn):</label>
+          <input type="text" id="examplePos" placeholder="Ví dụ: adj" />
+        </div>
+        <button class="ai-btn" onclick="doExample()">Tạo câu ví dụ</button>
+        <div class="ai-result" id="exampleResult"></div>
+      </div>
+
+      <!-- Synonyms Tab -->
+      <div class="ai-tab-content" id="tab-synonyms">
+        <div class="ai-input-group">
+          <label>Từ vựng:</label>
+          <input type="text" id="synWord" placeholder="Ví dụ: big" />
+        </div>
+        <div class="ai-input-group">
+          <label>Ngôn ngữ:</label>
+          <select id="synLang">
+            <option value="en">Tiếng Anh</option>
+            <option value="vi">Tiếng Việt</option>
+          </select>
+        </div>
+        <button class="ai-btn" onclick="doSynonyms()">Tìm từ đồng nghĩa</button>
+        <div class="ai-result" id="synResult"></div>
+      </div>
+
+      <!-- Antonyms Tab -->
+      <div class="ai-tab-content" id="tab-antonyms">
+        <div class="ai-input-group">
+          <label>Từ vựng:</label>
+          <input type="text" id="antWord" placeholder="Ví dụ: big" />
+        </div>
+        <div class="ai-input-group">
+          <label>Ngôn ngữ:</label>
+          <select id="antLang">
+            <option value="en">Tiếng Anh</option>
+            <option value="vi">Tiếng Việt</option>
+          </select>
+        </div>
+        <button class="ai-btn" onclick="doAntonyms()">Tìm từ trái nghĩa</button>
+        <div class="ai-result" id="antResult"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // AI Assistant Functions
+    function toggleAI() {
+      document.getElementById('aiPanel').classList.toggle('active');
+    }
+    
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.ai-tab').forEach(tab => tab.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      // Update tab content
+      document.querySelectorAll('.ai-tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+    
+    async function doTranslate() {
+      const text = document.getElementById('translateText').value.trim();
+      const dir = document.getElementById('translateDir').value;
+      const resultDiv = document.getElementById('translateResult');
+      
+      if (!text) {
+        resultDiv.innerHTML = '<div class="ai-error">Vui lòng nhập văn bản!</div>';
+        resultDiv.classList.add('show');
+        return;
+      }
+      
+      const [fromLang, toLang] = dir.split('-');
+      
+      resultDiv.innerHTML = '<div class="ai-loading">⏳ Đang dịch...</div>';
+      resultDiv.classList.add('show');
+      
+      try {
+        const response = await fetch('/api/ai/translate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, from_lang: fromLang, to_lang: toLang })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <div class=\"ai-result-label\">📝 Bản dịch <span class=\"badge\">${data.provider || 'ai'}</span>:</div>
+            <div class=\"ai-result-text\">${data.translation}</div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="ai-error">❌ ${data.error}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="ai-error">❌ Lỗi kết nối: ${error.message}</div>`;
+      }
+    }
+    
+    async function doGrammar() {
+      const text = document.getElementById('grammarText').value.trim();
+      const resultDiv = document.getElementById('grammarResult');
+      
+      if (!text) {
+        resultDiv.innerHTML = '<div class="ai-error">Vui lòng nhập văn bản!</div>';
+        resultDiv.classList.add('show');
+        return;
+      }
+      
+      resultDiv.innerHTML = '<div class="ai-loading">⏳ Đang kiểm tra...</div>';
+      resultDiv.classList.add('show');
+      
+      try {
+        const response = await fetch('/api/ai/grammar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, language: 'en' })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <div class=\"ai-result-label\">✅ Kết quả <span class=\"badge\">${data.provider || 'ai'}</span>:</div>
+            <div class=\"ai-result-text\">${data.result.replace(/\n/g, '<br>')}</div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="ai-error">❌ ${data.error}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="ai-error">❌ Lỗi kết nối: ${error.message}</div>`;
+      }
+    }
+    
+    async function doExample() {
+      const word = document.getElementById('exampleWord').value.trim();
+      const pos = document.getElementById('examplePos').value.trim();
+      const resultDiv = document.getElementById('exampleResult');
+      
+      if (!word) {
+        resultDiv.innerHTML = '<div class="ai-error">Vui lòng nhập từ vựng!</div>';
+        resultDiv.classList.add('show');
+        return;
+      }
+      
+      resultDiv.innerHTML = '<div class="ai-loading">⏳ Đang tạo ví dụ...</div>';
+      resultDiv.classList.add('show');
+      
+      try {
+        const response = await fetch('/api/ai/example', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ word, pos: pos || null })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.innerHTML = `
+            <div class=\"ai-result-label\">💡 Câu ví dụ <span class=\"badge\">${data.provider || 'ai'}</span>:</div>
+            <div class=\"ai-result-text\">${data.example}</div>
+          `;
+        } else {
+          resultDiv.innerHTML = `<div class="ai-error">❌ ${data.error}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="ai-error">❌ Lỗi kết nối: ${error.message}</div>`;
+      }
+    }
+
+    async function doSynonyms() {
+      const word = document.getElementById('synWord').value.trim();
+      const language = document.getElementById('synLang').value;
+      const resultDiv = document.getElementById('synResult');
+      if (!word) { resultDiv.innerHTML = '<div class="ai-error">Vui lòng nhập từ!</div>'; resultDiv.classList.add('show'); return; }
+      resultDiv.innerHTML = '<div class="ai-loading">⏳ Đang tìm...</div>'; resultDiv.classList.add('show');
+      try {
+        const res = await fetch('/api/ai/synonyms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ word, language, translate_to: 'vi' }) });
+        const data = await res.json();
+        if (data.success) {
+          const list = (data.synonyms || []).map(it => it.vi ? `${it.en} — <em>${it.vi}</em>` : it.en);
+          resultDiv.innerHTML = `<div class="ai-result-label">🔁 Đồng nghĩa (${data.provider || 'ai'}):</div><div class="ai-result-text">${list.join(', ') || 'Không có kết quả'}</div>`;
+        } else { resultDiv.innerHTML = `<div class="ai-error">❌ ${data.error}</div>`; }
+      } catch (e) { resultDiv.innerHTML = `<div class="ai-error">❌ ${e.message}</div>`; }
+    }
+
+    async function doAntonyms() {
+      const word = document.getElementById('antWord').value.trim();
+      const language = document.getElementById('antLang').value;
+      const resultDiv = document.getElementById('antResult');
+      if (!word) { resultDiv.innerHTML = '<div class="ai-error">Vui lòng nhập từ!</div>'; resultDiv.classList.add('show'); return; }
+      resultDiv.innerHTML = '<div class="ai-loading">⏳ Đang tìm...</div>'; resultDiv.classList.add('show');
+      try {
+        const res = await fetch('/api/ai/antonyms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ word, language, translate_to: 'vi' }) });
+        const data = await res.json();
+        if (data.success) {
+          const list = (data.antonyms || []).map(it => it.vi ? `${it.en} — <em>${it.vi}</em>` : it.en);
+          resultDiv.innerHTML = `<div class="ai-result-label">↔️ Trái nghĩa (${data.provider || 'ai'}):</div><div class="ai-result-text">${list.join(', ') || 'Không có kết quả'}</div>`;
+        } else { resultDiv.innerHTML = `<div class="ai-error">❌ ${data.error}</div>`; }
+      } catch (e) { resultDiv.innerHTML = `<div class="ai-error">❌ ${e.message}</div>`; }
+    }
+  </script>
+</body>
+</html>

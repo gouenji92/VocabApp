@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed - VocabApp</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/base.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .top-header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 12px 20px;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            background: #f0f2f5;
+            font-size: 0.95em;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .nav-btn.active {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1em;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 680px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+
+        /* Post Card */
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Post Header */
+        .post-header {
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .post-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-weight: 700;
+            color: #050505;
+            font-size: 0.95em;
+            margin-bottom: 4px;
+        }
+
+        .post-time {
+            color: #65676b;
+            font-size: 0.8em;
+        }
+
+        .post-menu {
+            background: none;
+            border: none;
+            color: #65676b;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 0 8px;
+        }
+
+        /* Post Content */
+        .post-content {
+            padding: 0 16px 12px;
+        }
+
+        .post-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #050505;
+            margin-bottom: 8px;
+        }
+
+        .post-description {
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .post-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .meta-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background: #f0f2f5;
+            border-radius: 16px;
+            font-size: 0.85em;
+            color: #65676b;
+        }
+
+        /* Terms Preview */
+        .terms-preview {
+            background: #f7f8fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .terms-preview-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #65676b;
+            margin-bottom: 12px;
+        }
+
+        .term-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #e4e6eb;
+        }
+
+        .term-item:last-child {
+            border-bottom: none;
+        }
+
+        .term-word {
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 4px;
+        }
+
+        .term-def {
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .view-all-terms {
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .view-all-terms a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        /* Post Stats */
+        .post-stats {
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #e4e6eb;
+            color: #65676b;
+            font-size: 0.9em;
+        }
+
+        .stat-item {
+            cursor: pointer;
+        }
+
+        .stat-item:hover {
+            text-decoration: underline;
+        }
+
+        /* Post Actions */
+        .post-actions {
+            padding: 8px 16px 12px;
+            display: flex;
+            gap: 8px;
+            border-top: 1px solid #e4e6eb;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            color: #65676b;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .action-btn.liked {
+            color: #e4405f;
+        }
+
+        .action-btn.liked .icon {
+            animation: likeAnimation 0.4s ease;
+        }
+
+        @keyframes likeAnimation {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        /* Comments Section */
+        .comments-section {
+            padding: 12px 16px;
+            border-top: 1px solid #e4e6eb;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .comments-section.active {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .comment-input {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .comment-input input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #e4e6eb;
+            border-radius: 20px;
+            background: #f0f2f5;
+            font-size: 0.9em;
+        }
+
+        .comment-input button {
+            padding: 8px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9em;
+            flex-shrink: 0;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-bubble {
+            background: #f0f2f5;
+            padding: 10px 12px;
+            border-radius: 18px;
+            display: inline-block;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            font-size: 0.85em;
+            margin-bottom: 2px;
+        }
+
+        .comment-text {
+            font-size: 0.9em;
+            color: #050505;
+        }
+
+        .comment-time {
+            font-size: 0.75em;
+            color: #65676b;
+            margin-top: 4px;
+            margin-left: 12px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #65676b;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-feed {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .empty-feed h2 {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .empty-feed p {
+            color: #65676b;
+            margin-bottom: 20px;
+        }
+
+        .empty-feed .btn {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        /* Create Post Button */
+        .create-post-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: #f0f2f5;
+            border: none;
+            border-radius: 25px;
+            text-align: left;
+            color: #65676b;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: background 0.2s;
+        }
+
+        .create-post-btn:hover {
+            background: #e4e6eb;
+        }
+
+        /* Create Post Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e4e6eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.3em;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: #f0f2f5;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #65676b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #e4e6eb;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-user-info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-textarea {
+            width: 100%;
+            min-height: 120px;
+            border: none;
+            font-size: 1.1em;
+            resize: vertical;
+            font-family: inherit;
+            outline: none;
+            margin-bottom: 16px;
+        }
+
+        .modal-textarea::placeholder {
+            color: #bbb;
+        }
+
+        .attach-set-section {
+            background: #f7f8fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .attach-set-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #65676b;
+        }
+
+        .attach-set-section select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e4e6eb;
+            border-radius: 8px;
+            font-size: 0.95em;
+            background: white;
+        }
+
+        .modal-footer {
+            padding: 16px 20px;
+            border-top: 1px solid #e4e6eb;
+        }
+
+        .btn-post {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-post:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Text Post Styles */
+        .text-post-content {
+            padding: 0 16px 12px;
+            font-size: 1.05em;
+            line-height: 1.6;
+            color: #050505;
+            white-space: pre-wrap;
+        }
+
+        .attached-set-preview {
+            margin: 12px 16px;
+            padding: 16px;
+            background: #f7f8fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .attached-set-title {
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .attached-set-meta {
+            color: #65676b;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .search-bar {
+                display: none;
+            }
+
+            .nav-icons {
+                gap: 8px;
+            }
+
+            .container {
+                padding: 0 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="top-header">
+        <div class="header-content">
+            <a href="/" class="logo">VocabApp</a>
+            <div class="search-bar">
+                <input type="text" placeholder="🔍 Tìm kiếm bộ từ...">
+            </div>
+      <div class="nav-icons">
+        <a href="/feed" class="nav-btn active">🏠 Feed</a>
+        <a href="/sets" class="nav-btn">📚 Bộ từ của tôi</a>
+        <a href="/dashboard" class="nav-btn">📊 Thống kê</a>
+    {% if user and user.avatar %}
+    <img src="{{ user.avatar }}" class="user-avatar-img" title="{{ user.display_name or username }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />
+    {% else %}
+    <div class="user-avatar" title="{{ user.display_name if user else username }}">{{ username[0].upper() }}</div>
+    {% endif %}
+    <a href="/profile" class="nav-btn">👤 Hồ sơ</a>
+        <a href="/logout" class="nav-btn" style="color:#ef4444;">Đăng xuất</a>
+      </div>
+    </div>
+  </div>    <!-- Main Feed -->
+    <div class="container">
+        <!-- Create Post Box -->
+        <div class="post-card" style="margin-bottom: 16px;">
+            <div class="post-header">
+                {% if user and user.avatar %}
+                <img src="{{ user.avatar }}" class="author-avatar" style="object-fit:cover;" />
+                {% else %}
+                <div class="author-avatar">{{ username[0].upper() }}</div>
+                {% endif %}
+                <button class="create-post-btn" onclick="openCreatePostModal()">
+                    {{ username }} ơi, bạn đang nghĩ gì thế?
+                </button>
+            </div>
+        </div>
+
+        <div id="feed-container">
+            {% if posts %}
+                {% for post in posts %}
+                <div class="post-card" data-set-id="{{ post.id }}">
+                    <!-- Post Header -->
+                    <div class="post-header">
+                                                <div class="author-avatar">
+                                                    {{ (post.username or post.owner_username or 'U')[0].upper() }}
+                                                </div>
+                        <div class="post-info">
+                            <div class="author-name">{{ post.username or post.owner_username or 'Người dùng' }}</div>
+                            <div class="post-time">{{ format_time(post.created_at) }}</div>
+                        </div>
+                        <button class="post-menu">⋯</button>
+                    </div>
+
+                    <!-- Post Content -->
+                    {% if post.post_type == 'text_post' %}
+                        <!-- Text Post -->
+                        <div class="text-post-content">{{ post.content }}</div>
+                        
+                        <!-- Attached Set Preview -->
+                        {% if post.attached_set %}
+                        <div class="attached-set-preview">
+                            <div class="attached-set-title">📚 {{ post.attached_set.name }}</div>
+                            <div class="attached-set-meta">
+                                {{ post.attached_set.term_count }} từ · 
+                                {{ post.attached_set.language_from }} → {{ post.attached_set.language_to }}
+                            </div>
+                            {% if post.attached_set.preview_terms %}
+                            <div style="margin-top: 12px;">
+                                {% for term in post.attached_set.preview_terms %}
+                                <div class="term-item" style="padding: 8px 0; border-bottom: 1px solid #e4e6eb;">
+                                    <div class="term-word">{{ term.term }}</div>
+                                    <div class="term-def">{{ term.definition }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <div style="margin-top: 12px;">
+                                <a href="/sets/{{ post.attached_set.id }}" style="color: #667eea; text-decoration: none; font-weight: 600;">
+                                    Xem chi tiết →
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <!-- Vocab Set Post -->
+                        <div class="post-content">
+                            <div class="post-title">{{ post.name }}</div>
+                            {% if post.description %}
+                            <div class="post-description">{{ post.description }}</div>
+                            {% endif %}
+                            
+                            <div class="post-meta">
+                                <span class="meta-tag">📚 {{ post.term_count }} từ</span>
+                                <span class="meta-tag">🌐 {{ post.language_from }} → {{ post.language_to }}</span>
+                            </div>
+
+                            <!-- Terms Preview -->
+                            {% if post.preview_terms %}
+                            <div class="terms-preview">
+                                <div class="terms-preview-title">👀 Xem trước từ vựng:</div>
+                                {% for term in post.preview_terms %}
+                                <div class="term-item">
+                                    <div class="term-word">{{ term.term }}</div>
+                                    <div class="term-def">{{ term.definition }}</div>
+                                </div>
+                                {% endfor %}
+                                {% if post.term_count > 3 %}
+                                <div class="view-all-terms">
+                                    <a href="/sets/{{ post.id }}">Xem tất cả {{ post.term_count }} từ →</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Post Stats -->
+                    {% if post.likes_count > 0 or post.comments_count > 0 or post.shares_count > 0 %}
+                    <div class="post-stats">
+                        <span class="stat-item">
+                            {% if post.likes_count > 0 %}❤️ {{ post.likes_count }}{% endif %}
+                        </span>
+                        <span>
+                            {% if post.comments_count > 0 %}{{ post.comments_count }} bình luận{% endif %}
+                            {% if post.shares_count > 0 %}· {{ post.shares_count }} lượt sao chép{% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    <!-- Post Actions -->
+                    <div class="post-actions">
+                        <button class="action-btn like-btn {% if post.is_liked %}liked{% endif %}" 
+                                onclick="toggleLike('{{ post.id }}', this)">
+                            <span class="icon">{% if post.is_liked %}❤️{% else %}🤍{% endif %}</span>
+                            <span>Thích</span>
+                        </button>
+                        <button class="action-btn" onclick="toggleComments('{{ post.id }}')">
+                            <span class="icon">💬</span>
+                            <span>Bình luận</span>
+                        </button>
+                        <button class="action-btn" onclick="copySet('{{ post.id }}', '{{ post.name }}')">
+                            <span class="icon">📥</span>
+                            <span>Sao chép</span>
+                        </button>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="comments-section" id="comments-{{ post.id }}">
+                        <div class="comment-input">
+                            <input type="text" placeholder="Viết bình luận..." 
+                                   id="comment-input-{{ post.id }}"
+                                   onkeypress="if(event.key==='Enter') postComment('{{ post.id }}')">
+                            <button onclick="postComment('{{ post.id }}')">Gửi</button>
+                        </div>
+                        <div id="comments-list-{{ post.id }}">
+                            <!-- Comments will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="empty-feed">
+                <h2>🌟 Chưa có bài viết nào</h2>
+                <p>Hãy là người đầu tiên chia sẻ bộ từ vựng của bạn!</p>
+                <a href="/sets" class="btn">Đi đến Bộ từ của tôi</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Loading indicator for infinite scroll -->
+        <div class="loading" id="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <p>Đang tải thêm bài viết...</p>
+        </div>
+    </div>
+
+    <!-- Create Post Modal -->
+    <div class="modal-overlay" id="createPostModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Tạo bài viết</h2>
+                <button class="modal-close" onclick="closeCreatePostModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-user-info">
+                    <div class="author-avatar">{{ username[0].upper() }}</div>
+                    <div>
+                        <div style="font-weight: 700;">{{ username }}</div>
+                        <div style="font-size: 0.85em; color: #65676b;">Công khai</div>
+                    </div>
+                </div>
+                <textarea 
+                    id="postContent" 
+                    class="modal-textarea" 
+                    placeholder="{{ username }} ơi, bạn đang nghĩ gì thế?"
+                    maxlength="5000"
+                ></textarea>
+                
+                <div class="attach-set-section">
+                    <label>📚 Đính kèm bộ từ (không bắt buộc)</label>
+                    <select id="attachedSetId">
+                        <option value="">-- Không đính kèm --</option>
+                        {% for set in user_sets %}
+                        <option value="{{ set.id }}">{{ set.name }} ({{ set.language_from }} → {{ set.language_to }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-post" onclick="submitPost()" id="btnSubmitPost">Đăng</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        let isLoading = false;
+        let hasMore = true;
+
+        // Create Post Modal
+        function openCreatePostModal() {
+            document.getElementById('createPostModal').classList.add('active');
+            document.getElementById('postContent').focus();
+        }
+
+        function closeCreatePostModal() {
+            document.getElementById('createPostModal').classList.remove('active');
+            document.getElementById('postContent').value = '';
+            document.getElementById('attachedSetId').value = '';
+        }
+
+        async function submitPost() {
+            const content = document.getElementById('postContent').value.trim();
+            const attachedSetId = document.getElementById('attachedSetId').value;
+            const btn = document.getElementById('btnSubmitPost');
+            
+            if (!content) {
+                alert('Vui lòng nhập nội dung bài viết');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.textContent = 'Đang đăng...';
+            
+            try {
+                const response = await fetch('/api/posts/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: content,
+                        attached_set_id: attachedSetId || null
+                    })
+                });
+                
+                if (response.ok) {
+                    closeCreatePostModal();
+                    // Reload feed
+                    window.location.reload();
+                } else {
+                    const data = await response.json();
+                    alert('Lỗi: ' + (data.error || 'Không thể đăng bài'));
+                }
+            } catch (error) {
+                alert('Lỗi: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Đăng';
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('createPostModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCreatePostModal();
+            }
+        });
+
+        // Infinite Scroll
+        window.addEventListener('scroll', () => {
+            if (isLoading || !hasMore) return;
+            
+            const scrollPosition = window.innerHeight + window.scrollY;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            if (scrollPosition >= documentHeight - 500) {
+                loadMorePosts();
+            }
+        });
+
+        async function loadMorePosts() {
+            isLoading = true;
+            document.getElementById('loading-indicator').style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/feed?page=${currentPage + 1}&limit=10`);
+                const data = await response.json();
+                
+                if (data.posts && data.posts.length > 0) {
+                    currentPage++;
+                    appendPosts(data.posts);
+                } else {
+                    hasMore = false;
+                }
+            } catch (error) {
+                console.error('Error loading posts:', error);
+            } finally {
+                isLoading = false;
+                document.getElementById('loading-indicator').style.display = 'none';
+            }
+        }
+
+        function appendPosts(posts) {
+            const container = document.getElementById('feed-container');
+            // Add posts to container (similar HTML structure)
+            // Implementation would mirror the template above
+        }
+
+        // Like functionality
+        async function toggleLike(setId, button) {
+            try {
+                const isLiked = button.classList.contains('liked');
+                const response = await fetch(`/api/sets/${setId}/like`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ unlike: isLiked })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    button.classList.toggle('liked');
+                    const icon = button.querySelector('.icon');
+                    icon.textContent = data.liked ? '❤️' : '🤍';
+                    
+                    // Update count in stats
+                    updateLikeCount(setId, data.likes_count);
+                }
+            } catch (error) {
+                console.error('Error toggling like:', error);
+            }
+        }
+
+        function updateLikeCount(setId, count) {
+            const card = document.querySelector(`[data-set-id="${setId}"]`);
+            const stats = card.querySelector('.post-stats .stat-item');
+            if (stats) {
+                stats.innerHTML = count > 0 ? `❤️ ${count}` : '';
+            }
+        }
+
+        // Comments functionality
+        function toggleComments(setId) {
+            const commentsSection = document.getElementById(`comments-${setId}`);
+            const isActive = commentsSection.classList.contains('active');
+            
+            if (!isActive) {
+                loadComments(setId);
+            }
+            
+            commentsSection.classList.toggle('active');
+        }
+
+        async function loadComments(setId) {
+            try {
+                const response = await fetch(`/api/sets/${setId}/comments`);
+                const comments = await response.json();
+                
+                const commentsList = document.getElementById(`comments-list-${setId}`);
+                commentsList.innerHTML = comments.map(comment => `
+                    <div class="comment-item">
+                        <div class="comment-avatar">${comment.username[0].toUpperCase()}</div>
+                        <div class="comment-content">
+                            <div class="comment-bubble">
+                                <div class="comment-author">${comment.username}</div>
+                                <div class="comment-text">${comment.content}</div>
+                            </div>
+                            <div class="comment-time">${formatTime(comment.created_at)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading comments:', error);
+            }
+        }
+
+        async function postComment(setId) {
+            const input = document.getElementById(`comment-input-${setId}`);
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            try {
+                const response = await fetch(`/api/sets/${setId}/comment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content })
+                });
+                
+                if (response.ok) {
+                    input.value = '';
+                    loadComments(setId);
+                    
+                    // Update comment count
+                    const data = await response.json();
+                    updateCommentCount(setId, data.comments_count);
+                }
+            } catch (error) {
+                console.error('Error posting comment:', error);
+            }
+        }
+
+        function updateCommentCount(setId, count) {
+            const card = document.querySelector(`[data-set-id="${setId}"]`);
+            const stats = card.querySelector('.post-stats span:last-child');
+            if (stats) {
+                const text = count > 0 ? `${count} bình luận` : '';
+                stats.innerHTML = text;
+            }
+        }
+
+        // Copy set
+        async function copySet(setId, setName) {
+            if (!confirm(`Sao chép "${setName}" vào bộ từ của bạn?`)) return;
+            
+            try {
+                const response = await fetch(`/api/sets/${setId}/clone`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('✅ Đã sao chép bộ từ thành công!');
+                    
+                    // Update share count
+                    const data = await response.json();
+                    updateShareCount(setId);
+                } else {
+                    alert('❌ Không thể sao chép bộ từ');
+                }
+            } catch (error) {
+                alert('❌ Lỗi: ' + error.message);
+            }
+        }
+
+        function updateShareCount(setId) {
+            // Increment share count in UI
+            const card = document.querySelector(`[data-set-id="${setId}"]`);
+            // Update logic here
+        }
+
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+            
+            if (seconds < 60) return 'Vừa xong';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} phút trước`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} giờ trước`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)} ngày trước`;
+            
+            return date.toLocaleDateString('vi-VN');
+        }
+    </script>
+</body>
+</html>

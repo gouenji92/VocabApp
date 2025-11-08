@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Danh sách bộ từ</title>
+  <link rel="stylesheet" href="/static/base.css">
+  <style>
+    .container { max-width: 1100px; margin: 0 auto; padding: 1rem 1.25rem 2rem; }
+    .search-box { margin-bottom: 1rem; }
+    .search-box input { width: 100%; }
+    .actions { margin:1rem 0 1.25rem; display:flex; gap:.5rem; flex-wrap:wrap; }
+    .sets-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap:1rem; }
+    .set-item h3 { margin:.25rem 0 .5rem; }
+    .set-item .actions { margin-top:.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+      <div style="display:flex;align-items:center;gap:.6rem;font-weight:700;">
+        <a href="/" style="color:#fff;">VocabApp</a>
+      </div>
+      <nav style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/">Upload</a>
+        <a href="/sets">Bộ từ</a>
+        <span class="badge badge-info" style="background:rgba(255,255,255,0.25);border-color:rgba(255,255,255,0.35);color:#fff;">👤 {{ username }}</span>
+        <a href="/logout" style="color:#fee2e2;">Đăng xuất</a>
+        <button class="btn-ghost" onclick="toggleTheme()" title="Đổi giao diện">Giao diện</button>
+      </nav>
+    </div>
+  </header>
+  
+  <div class="container">
+    <div class="header-card" style="margin:1rem 0 1rem;">
+      <h1 style="margin:0 0 .25rem 0;">Danh sách bộ từ vựng</h1>
+      <p class="muted" style="margin:0;">Tổng hợp tất cả bộ từ của bạn</p>
+    </div>
+    
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Tìm kiếm bộ từ..." onkeyup="filterSets()" />
+    </div>
+    
+    <div class="actions">
+      <a href="/" class="btn">Tải lên bộ từ mới</a>
+    </div>
+    {% if sets %}
+      <div id="setsList" class="sets-grid">
+      {% for s in sets %}
+      <div class="card set-item" data-name="{{ s.name|lower }}" data-desc="{{ (s.description or '')|lower }}" style="padding:1rem;">
+        <h3>{{ s.name }}</h3>
+        <p class="muted" style="margin:.25rem 0 .5rem;">{{ s.description or '' }}</p>
+        <div class="muted" style="font-size:.85rem;">{{ s.language_from }} → {{ s.language_to }}</div>
+        <div class="actions">
+          <a href="/sets/{{ s.id }}" class="btn-ghost">Chi tiết</a>
+          <a href="/study/{{ s.id }}?mode=select" class="btn">Học ngay</a>
+        </div>
+      </div>
+      {% endfor %}
+      </div>
+      <p id="noResults" class="muted" style="display: none; text-align: center; padding: 2rem;">Không tìm thấy bộ từ nào phù hợp.</p>
+    {% else %}
+      <div class="empty-state">
+        <p>Chưa có bộ từ nào. <a href="/">Tải lên file</a> để bắt đầu.</p>
+      </div>
+    {% endif %}
+  </div>
+  
+  <script>
+    (function(){
+      const stored = localStorage.getItem('theme');
+      document.documentElement.setAttribute('data-theme', stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    })();
+    function toggleTheme(){
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    }
+    function filterSets() {
+      const input = document.getElementById('searchInput');
+      const filter = input.value.toLowerCase();
+      const setsList = document.getElementById('setsList');
+      const items = setsList ? setsList.getElementsByClassName('set-item') : [];
+      const noResults = document.getElementById('noResults');
+      
+      let visibleCount = 0;
+      
+      for (let i = 0; i < items.length; i++) {
+        const name = items[i].getAttribute('data-name');
+        const desc = items[i].getAttribute('data-desc');
+        
+        if (name.indexOf(filter) > -1 || desc.indexOf(filter) > -1) {
+          items[i].style.display = '';
+          visibleCount++;
+        } else {
+          items[i].style.display = 'none';
+        }
+      }
+      
+      if (noResults) {
+        noResults.style.display = (visibleCount === 0 && items.length > 0) ? 'block' : 'none';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Đăng nhập - Vocab App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/base.css">
+  <style>
+    body { display:flex; align-items:center; justify-content:center; min-height:100vh; }
+    .container { max-width: 420px; width:100%; padding: 0 1rem; }
+    .logo { text-align: center; font-size: 3rem; margin-bottom: 0.5rem; }
+    h1 { margin-bottom: .5rem; text-align:center; }
+    .subtitle { text-align:center; margin-bottom:1.5rem; }
+    .error { padding:.8rem; background:rgba(239,68,68,0.1); border:1px solid var(--danger); border-radius:10px; margin-top:1rem; color: var(--danger); }
+    .switch { text-align:center; margin-top:1rem; }
+    .switch a { color: var(--primary); font-weight:600; text-decoration:none; }
+  </style>
+  <script>
+    (function(){
+      const stored = localStorage.getItem('theme');
+      document.documentElement.setAttribute('data-theme', stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    })();
+  </script>
+  </head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="logo">📚</div>
+      <h1>VocabApp</h1>
+      <p class="muted subtitle">Đăng nhập để lưu tiến độ học của bạn</p>
+
+      {% if error %}
+      <div class="error">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" action="/login">
+        <label>Tên đăng nhập</label>
+        <input type="text" name="username" placeholder="username" required autofocus />
+
+        <label>Mật khẩu</label>
+        <input type="password" name="password" placeholder="••••••••" required />
+
+        <button class="btn" type="submit" style="width:100%; margin-top:1rem;">Đăng nhập</button>
+      </form>
+
+      <div class="switch muted">
+        Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
