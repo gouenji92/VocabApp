@@ -3,124 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Community Sets - VocabApp</title>
+    <title>Khám phá - VocabApp</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/base.css') }}">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f0f2f5;
-            min-height: 100vh;
-        }
-        
-        .top-header {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 12px 20px;
-            margin-bottom: 20px;
-        }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+    
+    .top-header {
+      background: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 20px;
+    }
 
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-        }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
 
-        .logo {
-            font-size: 1.8em;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-decoration: none;
-        }
+    .logo {
+      font-size: 1.8em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
 
-        .nav-icons {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
+    .nav-icons {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
 
-        .nav-btn {
-            padding: 8px 16px;
-            background: none;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.95em;
-            color: #333;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
+    .nav-btn {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1em;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
 
-        .nav-btn:hover {
-            background: #f0f2f5;
-        }
+    .nav-btn:hover {
+      background: #f0f2f5;
+    }
 
-        .nav-btn.active {
-            color: #667eea;
-            font-weight: 600;
-        }
+    .nav-btn svg.icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
 
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 1em;
-        }
+    .nav-btn.active {
+      color: #667eea;
+      font-weight: 600;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1em;
+    }
 
-        .nav-back {
-            display: inline-block;
-            margin-bottom: 20px;
-            padding: 12px 24px;
-            background: white;
-            border-radius: 12px;
-            text-decoration: none;
-            color: #667eea;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
 
-        .nav-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
+    .page-header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
 
-        .filters {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
+    .page-header h1 {
+      font-size: 2em;
+      color: #050505;
+      margin-bottom: 8px;
+    }
 
-        .filters form {
+    .page-header p {
+      color: #65676b;
+      font-size: 0.95em;
+    }
+
+    .filters {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }        .filters form {
             display: grid;
             grid-template-columns: 2fr 1fr 1fr auto;
             gap: 15px;
@@ -403,17 +407,18 @@
         <div class="header-content">
             <a href="/" class="logo">VocabApp</a>
             <div class="nav-icons">
-                <a href="/feed" class="nav-btn">🏠 Feed</a>
-                <a href="/sets" class="nav-btn">📚 Bộ từ của tôi</a>
-                <a href="/dashboard" class="nav-btn">📊 Thống kê</a>
+                <a href="/feed" class="nav-btn" title="Feed"><span class="icon">🏠</span> Feed</a>
+                <a href="/sets" class="nav-btn" title="Bộ từ của tôi"><span class="icon">📚</span> Bộ từ</a>
+                <a href="/dashboard" class="nav-btn" title="Thống kê"><span class="icon">📊</span> Thống kê</a>
                 <a href="/profile" class="nav-btn" title="Tài khoản">
                     {% if user and user.avatar %}
                         <img src="{{ user.avatar }}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;" />
                     {% else %}
                         <div class="user-avatar" title="{{ username }}">{{ username[0].upper() }}</div>
                     {% endif %}
+                    <span class="icon">👤</span> Tài khoản
                 </a>
-                <a href="/logout" class="nav-btn" style="color:#ef4444;">Đăng xuất</a>
+                <a href="/logout" class="nav-btn" style="color:#ef4444;font-weight:600;" title="Đăng xuất">Đăng xuất</a>
             </div>
         </div>
     </div>
@@ -570,3 +575,4 @@
     </script>
 </body>
 </html>
+

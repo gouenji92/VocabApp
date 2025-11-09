@@ -73,15 +73,26 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.95em;
+            font-size: 1.1em;
+            font-weight: 700;
             color: #333;
             text-decoration: none;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .nav-btn:hover {
             background: #f0f2f5;
         }
+
+    .nav-btn svg.icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
 
         .nav-btn.active {
             color: #667eea;
@@ -662,16 +673,28 @@
                 <input type="text" placeholder="🔍 Tìm kiếm bộ từ...">
             </div>
       <div class="nav-icons">
-        <a href="/feed" class="nav-btn active">🏠 Feed</a>
-        <a href="/sets" class="nav-btn">📚 Bộ từ của tôi</a>
-        <a href="/dashboard" class="nav-btn">📊 Thống kê</a>
+        <a href="/feed" class="nav-btn active" title="Feed">
+          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 15L24 4L42 15V40C42 41.1046 41.1046 42 40 42H8C6.89543 42 6 41.1046 6 40V15Z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 42V24H31V42" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Feed
+        </a>
+        <a href="/sets" class="nav-btn" title="Bộ từ của tôi">
+          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 8H32V40H8V8Z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 8H40V40H32" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Bộ từ
+        </a>
+        <a href="/dashboard" class="nav-btn" title="Thống kê">
+          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 42V18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M18 42V6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M30 42V26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M42 42V12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+          Thống kê
+        </a>
     {% if user and user.avatar %}
     <img src="{{ user.avatar }}" class="user-avatar-img" title="{{ user.display_name or username }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />
     {% else %}
     <div class="user-avatar" title="{{ user.display_name if user else username }}">{{ username[0].upper() }}</div>
     {% endif %}
-    <a href="/profile" class="nav-btn">👤 Hồ sơ</a>
-        <a href="/logout" class="nav-btn" style="color:#ef4444;">Đăng xuất</a>
+    <a href="/profile" class="nav-btn" title="Hồ sơ">
+      <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="12" r="8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Tài khoản
+    </a>
+        <a href="/logout" class="nav-btn" style="color:#ef4444;font-weight:600;" title="Đăng xuất">Đăng xuất</a>
       </div>
     </div>
   </div>    <!-- Main Feed -->

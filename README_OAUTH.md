@@ -73,8 +73,8 @@ GOOGLE_CLIENT_SECRET=GOCSPX-abc123xyz...
 
 **Bước 4: Copy credentials vào `.env`**
 ```env
-GITHUB_CLIENT_ID=Iv1.a1b2c3d4e5f6g7h8
-GITHUB_CLIENT_SECRET=abc123def456ghi789jkl012mno345pqr678stu
+GITHUB_CLIENT_ID=Ov23liRyrhRMclCWnR67
+GITHUB_CLIENT_SECRET=b64307927ded8cd8de9ebcaa59d979aa3256d458
 ```
 
 **Bước 5: Test**

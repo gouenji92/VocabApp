@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - VocabApp</title>
+  <link rel="stylesheet" href="/static/base.css" />
+  <script defer src="/static/theme.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">V</div>
+        <div class="sidebar-logo-text">VocabApp</div>
+      </div>
+
+      <nav>
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Khám phá</div>
+          <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+              <a href="/feed" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon">🏠</span>
+                <span>Feed</span>
+              </a>
+            </li>
+            <li class="sidebar-nav-item">
+              <a href="/browse" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon">🌍</span>
+                <span>Khám phá</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Học tập</div>
+          <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+              <a href="/" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon">📤</span>
+                <span>Tải lên</span>
+              </a>
+            </li>
+            <li class="sidebar-nav-item">
+              <a href="/sets" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon">📚</span>
+                <span>Bộ từ của tôi</span>
+              </a>
+            </li>
+            <li class="sidebar-nav-item">
+              <a href="/dashboard" class="sidebar-nav-link active">
+                <span class="sidebar-nav-icon">📊</span>
+                <span>Thống kê</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Tài khoản</div>
+          <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+              <a href="/profile" class="sidebar-nav-link">
+                <span class="sidebar-nav-icon">👤</span>
+                <span>Hồ sơ</span>
+              </a>
+            </li>
+            <li class="sidebar-nav-item">
+              <a href="/logout" class="sidebar-nav-link" style="color: var(--danger);">
+                <span class="sidebar-nav-icon">🚪</span>
+                <span>Đăng xuất</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-header">
+        <div class="content-breadcrumb">
+          <a href="/">Trang chủ</a> / Dashboard
+        </div>
+        <h1 class="content-title">📊 Thống kê học tập</h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem; margin-top: 0.5rem;">
+          Theo dõi tiến độ và thành tích học từ vựng của bạn
+        </p>
+        <div class="content-meta">
+          <div class="content-meta-item">
+            <span>👤</span>
+            <span><strong>{{ username }}</strong></span>
+          </div>
+          <div class="content-meta-item">
+            <span>📅</span>
+            <span>Cập nhật hôm nay</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📚</div>
+          <div style="font-size: 2rem; font-weight: 700; color: var(--primary); margin-bottom: 0.25rem;">
+            {{ stats.total_sets or 0 }}
+          </div>
+          <div style="color: var(--text-secondary); font-size: 0.9rem;">Tổng bộ từ</div>
+        </div>
+
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖</div>
+          <div style="font-size: 2rem; font-weight: 700; color: var(--accent); margin-bottom: 0.25rem;">
+            {{ stats.total_terms or 0 }}
+          </div>
+          <div style="color: var(--text-secondary); font-size: 0.9rem;">Tổng số từ</div>
+        </div>
+
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✅</div>
+          <div style="font-size: 2rem; font-weight: 700; color: var(--success); margin-bottom: 0.25rem;">
+            {{ stats.mastered_terms or 0 }}
+          </div>
+          <div style="color: var(--text-secondary); font-size: 0.9rem;">Đã thành thạo</div>
+        </div>
+
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔥</div>
+          <div style="font-size: 2rem; font-weight: 700; color: var(--warning); margin-bottom: 0.25rem;">
+            {{ stats.study_streak or 0 }}
+          </div>
+          <div style="color: var(--text-secondary); font-size: 0.9rem;">Chuỗi ngày học</div>
+        </div>
+      </div>
+
+      <!-- Recent Sets -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h2 style="margin: 0; font-size: 1.5rem;">Bộ từ gần đây</h2>
+          <a href="/sets" class="btn-secondary btn">Xem tất cả →</a>
+        </div>
+
+        {% if recent_sets %}
+        <div style="display: grid; gap: 1rem;">
+          {% for s in recent_sets %}
+          <div style="padding: 1.25rem; background: var(--surface-hover); border-radius: 10px; border: 1px solid var(--border); transition: all 0.2s ease; cursor: pointer;" 
+               onclick="window.location.href='/sets/{{ s.id }}'"
+               onmouseover="this.style.borderColor='var(--primary)'; this.style.transform='translateX(4px)';"
+               onmouseout="this.style.borderColor='var(--border)'; this.style.transform='translateX(0)';">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+              <h3 style="margin: 0; font-size: 1.1rem; font-weight: 600;">{{ s.name }}</h3>
+              <span style="padding: 0.25rem 0.75rem; background: var(--primary); color: white; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                {{ s.language_from }} → {{ s.language_to }}
+              </span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+              {{ s.description or 'Không có mô tả' }}
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">📚</div>
+          <p style="font-size: 1.1rem; margin-bottom: 1rem;">Chưa có bộ từ nào</p>
+          <a href="/" class="btn">Tải lên bộ từ đầu tiên</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Quick Actions -->
+      <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        <div class="card" style="text-align: center; cursor: pointer;" onclick="window.location.href='/'">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">📤</div>
+          <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Tải lên từ mới</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">Import CSV/Excel để thêm bộ từ</p>
+        </div>
+
+        <div class="card" style="text-align: center; cursor: pointer;" onclick="window.location.href='/browse'">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🌍</div>
+          <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Khám phá cộng đồng</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem;">Tìm bộ từ từ người dùng khác</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

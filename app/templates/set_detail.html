@@ -47,13 +47,20 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 0.95em;
+      font-size: 1.1em;
       color: #333;
       text-decoration: none;
       transition: all 0.3s;
     }
     .nav-btn:hover {
       background: #f0f2f5;
+    }
+
+    .nav-btn svg.icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      vertical-align: middle;
     }
     .nav-btn.active {
       color: #667eea;
@@ -249,18 +256,18 @@
     <div class="header-content">
       <a href="/" class="logo">VocabApp</a>
       <div class="nav-icons">
-        <a href="/feed" class="nav-btn">🏠 Feed</a>
-        <a href="/sets" class="nav-btn active">📚 Bộ từ của tôi</a>
-        <a href="/dashboard" class="nav-btn">📊 Thống kê</a>
+        <a href="/feed" class="nav-btn" title="Feed"><span class="icon">🏠</span> Feed</a>
+        <a href="/sets" class="nav-btn active" title="Bộ từ của tôi"><span class="icon">📚</span> Bộ từ</a>
+        <a href="/dashboard" class="nav-btn" title="Thống kê"><span class="icon">📊</span> Thống kê</a>
         <a href="/profile" class="nav-btn" title="Tài khoản">
           {% if user and user.avatar %}
             <img src="{{ user.avatar }}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;" />
           {% else %}
             <div class="user-avatar" title="{{ username }}">{{ username[0].upper() }}</div>
           {% endif %}
+          <span class="icon">👤</span> Tài khoản
         </a>
-        <a href="/logout" class="nav-btn" style="color:#ef4444;">Đăng xuất</a>
-      </div>
+        <a href="/logout" class="nav-btn" style="color:#ef4444;font-weight:600;" title="Đăng xuất">Đăng xuất</a></div>
     </div>
   </div>
   
@@ -390,3 +397,5 @@
   </script>
 </body>
 </html>
+
+
