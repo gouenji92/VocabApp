@@ -3,108 +3,36 @@
 <head>
   <meta charset="utf-8" />
   <title>Trắc nghiệm - {{ set_name }}</title>
-  <link rel="stylesheet" href="/static/base.css" />
+  <link rel="stylesheet" href="{{ url_for('static', path='/base.css') }}" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f2f5;
+      background: var(--bg);
       min-height: 100vh;
     }
-    .top-header {
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 12px 20px;
-    }
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-    .logo {
-      font-size: 1.8em;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-decoration: none;
-    }
-    .nav-icons {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-    .nav-btn {
-      padding: 8px 16px;
-      background: none;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1.1em;
-      color: #333;
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-    .nav-btn:hover {
-      background: #f0f2f5;
-    }
-
-    .nav-btn svg.icon {
-      width: 22px;
-      height: 22px;
-      flex-shrink: 0;
-      vertical-align: middle;
-    }
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 700;
-      font-size: 1em;
-    }
-    .term { font-size:2rem; font-weight:800; margin-bottom:.5rem; color:#050505; }
-    .pos { font-size:1rem; color:#65676b; margin-bottom:1rem; }
-    .choice { padding:1rem; margin:.5rem 0; border:2px solid #e4e6eb; border-radius:12px; cursor:pointer; background:white; transition:all 0.2s; font-size:1.05rem; }
-    .choice:hover { border-color:#667eea; background:rgba(102,126,234,0.06); }
-    .choice.correct { border-color:#10b981; background:rgba(16,185,129,0.15); color:#10b981; }
-    .choice.wrong { border-color:#ef4444; background:rgba(239,68,68,0.15); color:#ef4444; }
+    /* Header styles centralized in /static/base.css */
+    .term { font-size:2rem; font-weight:800; margin-bottom:.5rem; color: var(--text); }
+    .pos { font-size:1rem; color: var(--text-secondary); margin-bottom:1rem; }
+    .choice { padding:1rem; margin:.5rem 0; border:2px solid var(--border); border-radius:12px; cursor:pointer; background: var(--surface); transition:all 0.2s; font-size:1.05rem; }
+    .choice:hover { border-color: var(--primary); background:rgba(225, 48, 108, 0.06); }
+    .choice.correct { border-color: var(--success); background:rgba(16,185,129,0.15); color: var(--success); }
+    .choice.wrong { border-color: var(--danger); background:rgba(239,68,68,0.15); color: var(--danger); }
     .choice.disabled { cursor:not-allowed; opacity:0.8; }
     .feedback { margin-top:1rem; padding:.9rem; border-radius:12px; font-weight:700; }
-    .feedback.correct { background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.35); }
-    .feedback.wrong { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.35); }
+    .feedback.correct { background:rgba(16,185,129,0.15); color: var(--success); border:1px solid rgba(16,185,129,0.35); }
+    .feedback.wrong { background:rgba(239,68,68,0.15); color: var(--danger); border:1px solid rgba(239,68,68,0.35); }
   </style>
 </head>
 <body>
-  <div class="top-header">
-    <div class="header-content">
-      <a href="/" class="logo">VocabApp</a>
-      <div class="nav-icons">
-        <a href="/feed" class="nav-btn" title="Feed"><span class="icon">🏠</span> Feed</a>
-        <a href="/sets" class="nav-btn" title="Bộ từ của tôi"><span class="icon">📚</span> Bộ từ</a>
-        <a href="/dashboard" class="nav-btn" title="Thống kê"><span class="icon">📊</span> Thống kê</a>
-        <a href="/study/{{ set_id }}?mode=select" class="nav-btn" title="Đổi chế độ"><span class="icon">🔄</span> Đổi chế độ</a>
-        <a href="/profile" class="nav-btn" title="Tài khoản">
-          {% if user and user.avatar %}
-            <img src="{{ user.avatar }}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;" />
-          {% else %}
-            <div class="user-avatar" title="{{ username }}">{{ username[0].upper() }}</div>
-          {% endif %}
-          <span class="icon">👤</span> Tài khoản
-        </a>
-        <a href="/logout" class="nav-btn" style="color:#ef4444;font-weight:600;" title="Đăng xuất">Đăng xuất</a></div>
-    </div>
+  {% set active_page = 'sets' %}
+  {% include 'header.html' %}
+
+  <div class="back-button-container">
+    <button onclick="history.back()" class="back-button">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 8L5 16L13 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 16H27C35 16 41 22 41 30C41 38 35 44 27 44H21" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Quay lại
+    </button>
   </div>
   <main style="max-width:760px;margin:0 auto;padding:1rem;text-align:center;">
     <div class="header-card">
@@ -118,7 +46,7 @@
       <div id="choices"></div>
       <div class="feedback" id="feedback" style="display:none;"></div>
       <div style="margin-top:1rem;">
-        <button style="padding:10px 20px;background:#10b981;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;display:none;" id="next-btn" onclick="loadNext()">Tiếp theo</button>
+        <button style="padding:10px 20px;background:var(--success);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;display:none;" id="next-btn" onclick="loadNext()">Tiếp theo</button>
       </div>
     </div>
   </main>
@@ -142,7 +70,7 @@ async function loadNext() {
   });
   const data = await resp.json();
   if(!data.term){ 
-    document.getElementById('term').innerText = 'Đã hết từ! 🎉';
+  document.getElementById('term').innerText = 'Đã hết từ!';
     document.getElementById('pos').innerText = '';
     document.getElementById('choices').innerHTML = '';
     return;
@@ -182,12 +110,12 @@ async function selectChoice(choiceId) {
   if(correct) {
     correctCount++;
     feedbackEl.className = 'feedback correct';
-    feedbackEl.innerHTML = `✅ <strong>Chính xác!</strong>`;
+  feedbackEl.innerHTML = `<span class="iconify icon-check icon-18 icon-success" style="margin-right:6px;"></span><strong>Chính xác!</strong>`;
     await submitRating(5);
   } else {
     wrongCount++;
     feedbackEl.className = 'feedback wrong';
-    feedbackEl.innerHTML = `❌ <strong>Sai rồi!</strong> Đáp án đúng là: <strong>"${currentTerm.definition}"</strong>`;
+  feedbackEl.innerHTML = `<span class="iconify icon-error icon-18 icon-danger" style="margin-right:6px;"></span><strong>Sai rồi!</strong> Đáp án đúng là: <strong>"${currentTerm.definition}"</strong>`;
     await submitRating(1);
   }
   
@@ -209,5 +137,6 @@ loadNext();
 </script>
 </body>
 </html>
+
 
 

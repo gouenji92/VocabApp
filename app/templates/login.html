@@ -168,9 +168,9 @@
   <div class="form-container">
     <p class="title">Login</p>
     
-    {% if error %}
-    <div class="error">❌ {{ error }}</div>
-    {% endif %}
+  {% if error %}
+  <div class="error"><span class="iconify icon-error icon-16" style="margin-right:6px;"></span>{{ error }}</div>
+  {% endif %}
     
     <div id="oauth-error" class="error" style="display: none;"></div>
 
@@ -225,20 +225,20 @@
     
     if (error) {
       const errorDiv = document.getElementById('oauth-error');
-      let errorMessage = '';
+  let errorMessage = '';
       
       switch(error) {
         case 'oauth_not_configured':
-          errorMessage = '⚠️ Phương thức đăng nhập này chưa được cấu hình. Vui lòng liên hệ quản trị viên.';
+          errorMessage = '<span class="iconify icon-warning icon-16" style="margin-right:6px;"></span>Phương thức đăng nhập này chưa được cấu hình. Vui lòng liên hệ quản trị viên.';
           break;
         case 'oauth_failed':
-          errorMessage = '❌ Đăng nhập thất bại. Vui lòng thử lại hoặc sử dụng phương thức khác.';
+          errorMessage = '<span class="iconify icon-error icon-16" style="margin-right:6px;"></span>Đăng nhập thất bại. Vui lòng thử lại hoặc sử dụng phương thức khác.';
           break;
         default:
-          errorMessage = '❌ Có lỗi xảy ra. Vui lòng thử lại.';
+          errorMessage = '<span class="iconify icon-error icon-16" style="margin-right:6px;"></span>Có lỗi xảy ra. Vui lòng thử lại.';
       }
       
-      errorDiv.textContent = errorMessage;
+      errorDiv.innerHTML = errorMessage;
       errorDiv.style.display = 'block';
       
       // Xóa error parameter khỏi URL

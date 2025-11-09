@@ -16,58 +16,7 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
       background: #f0f2f5; 
     }
-    .top-header { 
-      background: white; 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-      position: sticky; 
-      top: 0; 
-      z-index: 100; 
-      padding: 12px 20px; 
-    }
-    .header-content { 
-      max-width: 1200px; 
-      margin: 0 auto; 
-      display:flex; 
-      align-items:center; 
-      justify-content:space-between; 
-    }
-    .logo { 
-      font-size: 1.8em; 
-      font-weight: 700; 
-      background: linear-gradient(135deg, #667eea, #764ba2); 
-      -webkit-background-clip: text; 
-      background-clip: text; 
-      -webkit-text-fill-color: transparent; 
-      text-decoration: none; 
-    }
-    .nav-icons { 
-      display:flex; 
-      gap:15px; 
-      align-items:center; 
-    }
-    .nav-btn { 
-      padding:8px 16px; 
-      border-radius:8px; 
-      text-decoration:none; 
-      color:#333; 
-      font-size: 1em;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .nav-btn:hover { 
-      background:#f0f2f5; 
-    }
-    .nav-btn .icon {
-      font-size: 1.3em;
-    }
-    .nav-btn svg.icon {
-      width: 22px;
-      height: 22px;
-      flex-shrink: 0;
-      vertical-align: middle;
-    }
+    /* Header styles centralized in /static/base.css */
 
     main { 
       max-width: 1000px; 
@@ -102,45 +51,26 @@
     .error { background:#fef2f2; border:1px solid #ef4444; color:#991b1b; }
     .avatar-preview { display:flex; align-items:center; gap:12px; }
     .avatar-preview img, .avatar-preview .fallback { width:64px; height:64px; border-radius:50%; object-fit:cover; display:block; background: linear-gradient(135deg, #667eea, #764ba2); color:white; font-weight:700; align-items:center; justify-content:center; }
-  /* Ensure nav avatar (image or initial) is perfectly centered and bold */
-  .user-avatar, .user-avatar-img { width:36px; height:36px; border-radius:50%; object-fit:cover; background: linear-gradient(135deg, #667eea, #764ba2); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; text-transform:uppercase; }
   </style>
 </head>
 <body>
-  <div class="top-header">
-    <div class="header-content">
-      <a href="/" class="logo">VocabApp</a>
-      <div class="nav-icons">
-        <a href="/feed" class="nav-btn" title="Feed">
-          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 15L24 4L42 15V40C42 41.1046 41.1046 42 40 42H8C6.89543 42 6 41.1046 6 40V15Z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 42V24H31V42" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Feed
-        </a>
-        <a href="/sets" class="nav-btn" title="Bộ từ của tôi">
-          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 8H32V40H8V8Z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 8H40V40H32" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Bộ từ
-        </a>
-        <a href="/dashboard" class="nav-btn" title="Thống kê">
-          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 42V18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M18 42V6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M30 42V26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M42 42V12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
-          Thống kê
-        </a>
-        {% if user and user.avatar %}
-        <img src="{{ user.avatar }}" class="user-avatar-img" title="{{ user.display_name or username }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />
-        {% else %}
-        <div class="user-avatar" title="{{ user.display_name if user else username }}">{{ username[0].upper() }}</div>
-        {% endif %}
-        <a href="/profile" class="nav-btn" style="font-weight:700;color:#667eea;" title="Tài khoản">
-          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="12" r="8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Tài khoản
-        </a>
-        <a href="/logout" class="nav-btn" style="color:#ef4444;font-weight:600;" title="Đăng xuất">Đăng xuất</a>
-      </div>
-    </div>
+  {% set active_page = 'profile' %}
+  {% include 'header.html' %}
+
+  <div class="back-button-container">
+    <button onclick="history.back()" class="back-button">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 8L5 16L13 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 16H27C35 16 41 22 41 30C41 38 35 44 27 44H21" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Quay lại
+    </button>
   </div>
 
   <main>
     <div class="grid">
       <section class="card">
-        <h2 class="section-title">👤 Hồ sơ</h2>
+        <h2 class="section-title">
+          <span class="iconify icon-user icon-24 icon-gradient-accent" style="margin-right:8px; vertical-align: middle;"></span>
+          Hồ sơ
+        </h2>
         {% if message %}<div class="message success">✅ {{ message }}</div>{% endif %}
         {% if error %}<div class="message error">❌ {{ error }}</div>{% endif %}
         <form method="post" action="/profile/update" enctype="multipart/form-data">
@@ -154,13 +84,20 @@
           </div>
           <div class="field">
             <label>Ảnh đại diện (JPG/PNG, &lt; 2MB)</label>
-            <div class="avatar-preview">
+            <div class="avatar-preview" style="flex-wrap:wrap; gap:16px;">
               {% if user and user.avatar %}
                 <img src="{{ user.avatar }}" alt="avatar">
               {% else %}
                 <div class="fallback" style="display:flex;">{{ username[0].upper() }}</div>
               {% endif %}
-              <input type="file" name="avatar" accept="image/png, image/jpeg" />
+              <!-- From Uiverse.io by Yaya12085 -->
+              <label class="custum-file-upload" for="avatar-input" style="margin-left:0;">
+                <div class="icon">
+                  <span class="iconify icon-camera icon-48 icon-gradient-accent"></span>
+                </div>
+                <div class="text"><span>Chọn ảnh đại diện</span></div>
+                <input id="avatar-input" type="file" name="avatar" accept="image/png, image/jpeg" />
+              </label>
             </div>
           </div>
           <div class="row">
@@ -171,7 +108,10 @@
       </section>
 
       <section class="card">
-        <h2 class="section-title">🔒 Đổi mật khẩu</h2>
+        <h2 class="section-title">
+          <span class="iconify icon-lock-line icon-24 icon-gradient-accent" style="margin-right:8px; vertical-align: middle;"></span>
+          Đổi mật khẩu
+        </h2>
         <form method="post" action="/profile/change-password">
           <div class="field">
             <label>Mật khẩu hiện tại</label>
@@ -192,5 +132,13 @@
       </section>
     </div>
   </main>
-</body>
+    <script src="{{ url_for('static', path='/enhanced.js') }}"></script>
+    <script>
+      // Initialize enhanced features (theme, toasts)
+      const themeManager = new ThemeManager();
+      window.toast = new ToastNotification();
+    </script>
+    <script src="/static/file_upload.js"></script>
+  </body>
 </html>
+

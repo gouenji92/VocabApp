@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cài đặt - VocabApp</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/base.css') }}">
+    <style>
+        .settings-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .settings-header {
+            margin-bottom: 32px;
+        }
+
+        .settings-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .settings-header p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .settings-section {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .settings-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-item-content {
+            flex: 1;
+        }
+
+        .settings-item-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .settings-item-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .settings-item-control {
+            margin-left: 20px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: 0.3s;
+            border-radius: 28px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, var(--instagram-purple), var(--instagram-pink));
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .toggle-slider:hover {
+            opacity: 0.9;
+        }
+
+        /* Theme Preview */
+        .theme-preview {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .theme-card {
+            flex: 1;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .theme-card.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
+        }
+
+        .theme-card-preview {
+            width: 100%;
+            height: 80px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .theme-card-light .theme-card-preview {
+            background: linear-gradient(135deg, #ffffff, #fafafa);
+            border: 1px solid #dbdbdb;
+        }
+
+        .theme-card-dark .theme-card-preview {
+            background: linear-gradient(135deg, #000000, #1a1a1a);
+            border: 1px solid #262626;
+        }
+
+        .theme-card-auto .theme-card-preview {
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 50%, #000000 50%, #000000 100%);
+        }
+
+        .theme-card-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .theme-card-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Select Dropdown */
+        .settings-select {
+            padding: 10px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 180px;
+            transition: border-color 0.2s ease;
+        }
+
+        .settings-select:hover {
+            border-color: var(--primary);
+        }
+
+        .settings-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
+        }
+
+        /* Button */
+        .settings-btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .settings-btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .settings-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .settings-btn-secondary {
+            background: var(--surface-elevated);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .settings-btn-secondary:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .settings-btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .settings-btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .settings-container {
+                padding: 16px;
+            }
+
+            .settings-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .settings-item-control {
+                margin-left: 0;
+                margin-top: 12px;
+                width: 100%;
+            }
+
+            .theme-preview {
+                flex-direction: column;
+            }
+
+            .settings-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% set active_page = 'settings' %}
+    {% include 'header.html' %}
+
+    <div class="settings-container">
+        <!-- Header -->
+        <div class="settings-header">
+            <h1>
+                <span class="iconify icon-settings icon-32 icon-gradient-accent" style="margin-right: 12px; vertical-align: middle;"></span>
+                Cài đặt
+            </h1>
+            <p>Quản lý tài khoản và tùy chỉnh trải nghiệm của bạn</p>
+        </div>
+
+        <!-- Appearance Settings -->
+        <div class="settings-section">
+            <h2>🎨 Giao diện</h2>
+            
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Chế độ tối (Dark Mode)</div>
+                    <div class="settings-item-description">
+                        Bật chế độ tối để bảo vệ mắt khi sử dụng vào ban đêm hoặc trong môi trường ánh sáng yếu
+                    </div>
+                </div>
+                <div class="settings-item-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="darkModeToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Chủ đề giao diện</div>
+                    <div class="settings-item-description">
+                        Chọn chủ đề hiển thị cho ứng dụng
+                    </div>
+                    <div class="theme-preview">
+                        <div class="theme-card theme-card-light" data-theme="light">
+                            <div class="theme-card-preview">☀️</div>
+                            <div class="theme-card-name">Sáng</div>
+                            <div class="theme-card-description">Giao diện sáng</div>
+                        </div>
+                        <div class="theme-card theme-card-dark" data-theme="dark">
+                            <div class="theme-card-preview">🌙</div>
+                            <div class="theme-card-name">Tối</div>
+                            <div class="theme-card-description">Giao diện tối</div>
+                        </div>
+                        <div class="theme-card theme-card-auto" data-theme="auto">
+                            <div class="theme-card-preview">🔄</div>
+                            <div class="theme-card-name">Tự động</div>
+                            <div class="theme-card-description">Theo hệ thống</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Settings -->
+        <div class="settings-section">
+            <h2>👤 Tài khoản</h2>
+            
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Tên người dùng</div>
+                    <div class="settings-item-description">{{ username }}</div>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Email</div>
+                    <div class="settings-item-description">{{ user.email if user else 'Chưa cập nhật' }}</div>
+                </div>
+                <div class="settings-item-control">
+                    <button class="settings-btn settings-btn-secondary" onclick="window.location.href='/profile'">
+                        Chỉnh sửa
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Ngày tham gia</div>
+                    <div class="settings-item-description" id="joinedDate">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Settings -->
+        <div class="settings-section">
+            <h2>📚 Học tập</h2>
+            
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Ngôn ngữ giao diện</div>
+                    <div class="settings-item-description">Chọn ngôn ngữ hiển thị cho ứng dụng</div>
+                </div>
+                <div class="settings-item-control">
+                    <select class="settings-select" id="languageSelect">
+                        <option value="vi" selected>Tiếng Việt</option>
+                        <option value="en">English</option>
+                        <option value="ja">日本語</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Tự động phát âm thanh</div>
+                    <div class="settings-item-description">Phát âm thanh tự động khi xem từ vựng</div>
+                </div>
+                <div class="settings-item-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoPlayAudio">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Số từ mỗi bài học</div>
+                    <div class="settings-item-description">Số lượng từ vựng trong mỗi phiên học</div>
+                </div>
+                <div class="settings-item-control">
+                    <select class="settings-select" id="wordsPerSession">
+                        <option value="10">10 từ</option>
+                        <option value="20" selected>20 từ</option>
+                        <option value="30">30 từ</option>
+                        <option value="50">50 từ</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Settings -->
+        <div class="settings-section">
+            <h2>🔔 Thông báo</h2>
+            
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Thông báo học tập</div>
+                    <div class="settings-item-description">Nhận nhắc nhở học tập hàng ngày</div>
+                </div>
+                <div class="settings-item-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="learningNotifications" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Thông báo tương tác</div>
+                    <div class="settings-item-description">Nhận thông báo khi có người like, comment bài viết</div>
+                </div>
+                <div class="settings-item-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="interactionNotifications" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Settings -->
+        <div class="settings-section">
+            <h2>🔒 Quyền riêng tư</h2>
+            
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Hồ sơ công khai</div>
+                    <div class="settings-item-description">Cho phép người khác xem hồ sơ của bạn</div>
+                </div>
+                <div class="settings-item-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="publicProfile" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Hiển thị tiến độ học</div>
+                    <div class="settings-item-description">Hiển thị tiến độ học tập trên hồ sơ</div>
+                </div>
+                <div class="settings-item-control">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showProgress" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="settings-section" style="border-color: var(--danger);">
+            <h2 style="color: var(--danger);">⚠️ Vùng nguy hiểm</h2>
+            
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Xóa tất cả dữ liệu học tập</div>
+                    <div class="settings-item-description">Xóa toàn bộ tiến độ và lịch sử học tập của bạn</div>
+                </div>
+                <div class="settings-item-control">
+                    <button class="settings-btn settings-btn-secondary" onclick="confirmClearData()">
+                        Xóa dữ liệu
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-item">
+                <div class="settings-item-content">
+                    <div class="settings-item-title">Xóa tài khoản</div>
+                    <div class="settings-item-description">Xóa vĩnh viễn tài khoản và tất cả dữ liệu liên quan</div>
+                </div>
+                <div class="settings-item-control">
+                    <button class="settings-btn settings-btn-danger" onclick="confirmDeleteAccount()">
+                        Xóa tài khoản
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Features -->
+    <script src="{{ url_for('static', path='/enhanced.js') }}"></script>
+    <script>
+        // Initialize enhanced features
+        const themeManager = new ThemeManager();
+        window.toast = new ToastNotification();
+        const shortcuts = new KeyboardShortcuts();
+
+        // Load current settings
+        function loadSettings() {
+            // Load theme
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const themeMode = localStorage.getItem('themeMode') || 'manual';
+            
+            // Update dark mode toggle
+            document.getElementById('darkModeToggle').checked = currentTheme === 'dark';
+            
+            // Update theme cards
+            document.querySelectorAll('.theme-card').forEach(card => {
+                card.classList.remove('active');
+                if (themeMode === 'auto' && card.dataset.theme === 'auto') {
+                    card.classList.add('active');
+                } else if (themeMode !== 'auto' && card.dataset.theme === currentTheme) {
+                    card.classList.add('active');
+                }
+            });
+
+            // Load other settings from localStorage
+            const autoPlayAudio = localStorage.getItem('autoPlayAudio') === 'true';
+            document.getElementById('autoPlayAudio').checked = autoPlayAudio;
+
+            const wordsPerSession = localStorage.getItem('wordsPerSession') || '20';
+            document.getElementById('wordsPerSession').value = wordsPerSession;
+
+            const languageSelect = localStorage.getItem('language') || 'vi';
+            document.getElementById('languageSelect').value = languageSelect;
+
+            // Load joined date
+            {% if user and user.joined_date %}
+            const joinedDate = new Date('{{ user.joined_date }}');
+            document.getElementById('joinedDate').textContent = joinedDate.toLocaleDateString('vi-VN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            {% else %}
+            document.getElementById('joinedDate').textContent = 'Không có thông tin';
+            {% endif %}
+        }
+
+        // Dark mode toggle
+        document.getElementById('darkModeToggle').addEventListener('change', function() {
+            const isDark = this.checked;
+            themeManager.theme = isDark ? 'dark' : 'light';
+            themeManager.applyTheme(themeManager.theme);
+            localStorage.setItem('theme', themeManager.theme);
+            localStorage.setItem('themeMode', 'manual');
+            
+            // Update theme cards
+            document.querySelectorAll('.theme-card').forEach(card => {
+                card.classList.remove('active');
+                if (card.dataset.theme === themeManager.theme) {
+                    card.classList.add('active');
+                }
+            });
+            
+            window.toast.show(`Đã chuyển sang ${isDark ? 'chế độ tối' : 'chế độ sáng'}`, 'success');
+        });
+
+        // Theme card selection
+        document.querySelectorAll('.theme-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const theme = this.dataset.theme;
+                
+                document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                
+                if (theme === 'auto') {
+                    // Auto mode: follow system preference
+                    localStorage.setItem('themeMode', 'auto');
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    themeManager.theme = prefersDark ? 'dark' : 'light';
+                    themeManager.applyTheme(themeManager.theme);
+                    document.getElementById('darkModeToggle').checked = prefersDark;
+                    window.toast.show('Chế độ tự động: Theo cài đặt hệ thống', 'info');
+                } else {
+                    // Manual mode
+                    localStorage.setItem('themeMode', 'manual');
+                    themeManager.theme = theme;
+                    themeManager.applyTheme(theme);
+                    localStorage.setItem('theme', theme);
+                    document.getElementById('darkModeToggle').checked = theme === 'dark';
+                    window.toast.show(`Đã chuyển sang chế độ ${theme === 'dark' ? 'tối' : 'sáng'}`, 'success');
+                }
+            });
+        });
+
+        // Auto play audio
+        document.getElementById('autoPlayAudio').addEventListener('change', function() {
+            localStorage.setItem('autoPlayAudio', this.checked);
+            window.toast.show(`Tự động phát âm thanh: ${this.checked ? 'Bật' : 'Tắt'}`, 'success');
+        });
+
+        // Words per session
+        document.getElementById('wordsPerSession').addEventListener('change', function() {
+            localStorage.setItem('wordsPerSession', this.value);
+            window.toast.show(`Số từ mỗi bài học: ${this.value} từ`, 'success');
+        });
+
+        // Language select
+        document.getElementById('languageSelect').addEventListener('change', function() {
+            localStorage.setItem('language', this.value);
+            window.toast.show('Ngôn ngữ sẽ được áp dụng sau khi tải lại trang', 'info');
+        });
+
+        // Learning notifications
+        document.getElementById('learningNotifications').addEventListener('change', function() {
+            localStorage.setItem('learningNotifications', this.checked);
+            window.toast.show(`Thông báo học tập: ${this.checked ? 'Bật' : 'Tắt'}`, 'success');
+        });
+
+        // Interaction notifications
+        document.getElementById('interactionNotifications').addEventListener('change', function() {
+            localStorage.setItem('interactionNotifications', this.checked);
+            window.toast.show(`Thông báo tương tác: ${this.checked ? 'Bật' : 'Tắt'}`, 'success');
+        });
+
+        // Public profile
+        document.getElementById('publicProfile').addEventListener('change', function() {
+            localStorage.setItem('publicProfile', this.checked);
+            window.toast.show(`Hồ sơ công khai: ${this.checked ? 'Bật' : 'Tắt'}`, 'success');
+        });
+
+        // Show progress
+        document.getElementById('showProgress').addEventListener('change', function() {
+            localStorage.setItem('showProgress', this.checked);
+            window.toast.show(`Hiển thị tiến độ: ${this.checked ? 'Bật' : 'Tắt'}`, 'success');
+        });
+
+        // Danger zone functions
+        function confirmClearData() {
+            if (confirm('⚠️ Bạn có chắc chắn muốn xóa tất cả dữ liệu học tập? Hành động này không thể hoàn tác!')) {
+                window.toast.show('Chức năng đang được phát triển', 'info');
+            }
+        }
+
+        function confirmDeleteAccount() {
+            if (confirm('⚠️ CẢNH BÁO: Bạn sắp xóa vĩnh viễn tài khoản!\n\nTất cả dữ liệu của bạn sẽ bị xóa và không thể khôi phục.\n\nBạn có chắc chắn muốn tiếp tục?')) {
+                if (confirm('Vui lòng xác nhận lần nữa. Bạn có THỰC SỰ muốn xóa tài khoản?')) {
+                    window.toast.show('Chức năng đang được phát triển', 'info');
+                }
+            }
+        }
+
+        // Listen for system theme changes when in auto mode
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            const themeMode = localStorage.getItem('themeMode');
+            if (themeMode === 'auto') {
+                themeManager.theme = e.matches ? 'dark' : 'light';
+                themeManager.applyTheme(themeManager.theme);
+                document.getElementById('darkModeToggle').checked = e.matches;
+            }
+        });
+
+        // Load settings on page load
+        loadSettings();
+    </script>
+</body>
+</html>

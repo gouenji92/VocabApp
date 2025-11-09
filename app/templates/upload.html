@@ -17,85 +17,7 @@
       min-height: 100vh;
     }
 
-    /* Header giống Feed */
-    .top-header {
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 12px 20px;
-    }
-
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .logo {
-      font-size: 1.8em;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-decoration: none;
-    }
-
-    .nav-icons {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-
-    .nav-btn {
-      padding: 8px 16px;
-      background: none;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1.1em;
-      font-weight: 700;
-      color: #333;
-      text-decoration: none;
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .nav-btn:hover {
-      background: #f0f2f5;
-    }
-
-    .nav-btn svg.icon {
-      width: 22px;
-      height: 22px;
-      flex-shrink: 0;
-      vertical-align: middle;
-    }
-
-    .nav-btn.active {
-      color: #667eea;
-      font-weight: 600;
-    }
-
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 700;
-      font-size: 1em;
-    }
+    /* Header styles centralized in /static/base.css */
 
     main { 
       max-width: 960px; 
@@ -254,6 +176,8 @@
       margin: 0 0 12px 0;
     }
 
+    /* Upload component styles centralized in /static/base.css */
+
     @media (max-width: 768px) {
       .nav-icons {
         gap: 8px;
@@ -291,29 +215,42 @@
           <svg class="icon" width="22" height="22" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 42V18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M18 42V6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M30 42V26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M42 42V12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
           Thống kê
         </a>
-        {% if user and user.avatar %}
-        <img src="{{ user.avatar }}" class="user-avatar-img" title="{{ user.display_name or username }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />
-        {% else %}
-        <div class="user-avatar" title="{{ user.display_name if user else username }}">{{ username[0].upper() }}</div>
-        {% endif %}
         <a href="/profile" class="nav-btn" title="Tài khoản">
           <svg class="icon" width="22" height="22" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="12" r="8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Tài khoản
         </a>
-        <a href="/logout" class="nav-btn" style="color:#ef4444;font-weight:600;" title="Đăng xuất">Đăng xuất</a></div>
+        {% if user and user.avatar %}
+        <img src="{{ user.avatar }}" class="user-avatar-img" title="{{ user.display_name or username }}" />
+        {% else %}
+        <div class="user-avatar" title="{{ user.display_name if user else username }}">{{ username[0].upper() }}</div>
+        {% endif %}
+        <a href="/logout" class="nav-btn logout" title="Đăng xuất">Đăng xuất</a></div>
     </div>
+  </div>
+
+  <div class="back-button-container">
+    <button onclick="history.back()" class="back-button">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 8L5 16L13 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 16H27C35 16 41 22 41 30C41 38 35 44 27 44H21" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Quay lại
+    </button>
   </div>
 
   <main>
     <div class="page-header">
-      <h1>📤 Tải lên bộ từ vựng</h1>
+  <h1><span class="iconify icon-upload icon-24 icon-gradient-accent" style="margin-right:8px;"></span>Tải lên bộ từ vựng</h1>
       <p>Bước 1: Chọn file CSV/XLSX có header → Bước 2: Xem trước & điều chỉnh cột → Bước 3: Nhập dữ liệu vào hệ thống</p>
     </div>
 
     <section class="card" id="step1">
       <form id="form-detect" enctype="multipart/form-data">
         <label>File dữ liệu (CSV/XLSX)</label>
-        <input type="file" name="file" accept=".csv,.xlsx" required />
+        <label class="custum-file-upload">
+          <div class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80"><path d="M19 15v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="16 10 12 6 8 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="6" x2="12" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="text"><span>Chọn hoặc kéo thả file CSV/XLSX</span></div>
+          <input id="file-upload" type="file" name="file" accept=".csv,.xlsx" required />
+        </label>
 
         <label>Tên bộ từ</label>
         <input type="text" name="set_name" placeholder="Ví dụ: 3000 từ thông dụng" required />
@@ -330,7 +267,7 @@
         </div>
 
         <div style="display:flex;gap:.75rem;">
-          <button type="submit" class="btn">🔍 Phân tích cột</button>
+          <button type="submit" class="btn"><span class="iconify icon-search icon-16" style="margin-right:6px;"></span>Phân tích cột</button>
           <a href="/sets" class="btn-ghost">← Quay lại danh sách</a>
         </div>
       </form>
@@ -347,25 +284,39 @@
         <input type="hidden" name="visibility" value="private" />
 
         <label>File gốc (gửi lại)</label>
-        <input type="file" name="file" accept=".csv,.xlsx" required />
+        <label class="custum-file-upload">
+          <div class="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80"><path d="M19 15v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><polyline points="16 10 12 6 8 10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="6" x2="12" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="text"><span>Chọn lại file CSV/XLSX để nhập</span></div>
+          <input id="file-upload-2" type="file" name="file" accept=".csv,.xlsx" required />
+        </label>
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
           <div>
-            <label>🔤 Cột <strong>Từ vựng</strong> (bắt buộc)</label>
+            <label><span class="iconify icon-note icon-14 icon-gradient-accent" style="margin-right:4px;"></span>Cột <strong>Từ vựng</strong> (bắt buộc)</label>
             <select name="word_col" id="word_col" required></select>
           </div>
           <div>
-            <label>📖 Cột <strong>Nghĩa</strong> (bắt buộc)</label>
+            <label><span class="iconify icon-book icon-14 icon-gradient-accent" style="margin-right:4px;"></span>Cột <strong>Nghĩa</strong> (bắt buộc)</label>
             <select name="meaning_col" id="meaning_col" required></select>
           </div>
           <div>
-            <label>🏷️ Cột <strong>Loại từ</strong> (tuỳ chọn)</label>
+            <label><span class="iconify icon-tag icon-14 icon-gradient-accent" style="margin-right:4px;"></span>Cột <strong>Loại từ</strong> (tuỳ chọn)</label>
             <select name="pos_col" id="pos_col"></select>
+          </div>
+          <div>
+            <label><span class="iconify icon-voice icon-14 icon-gradient-accent" style="margin-right:4px;"></span>Cột <strong>Phiên âm</strong> (tuỳ chọn)</label>
+            <select name="pronunciation_col" id="pronunciation_col"></select>
+          </div>
+          <div>
+            <label><span class="iconify icon-message icon-14 icon-gradient-accent" style="margin-right:4px;"></span>Cột <strong>Ví dụ</strong> (tuỳ chọn)</label>
+            <select name="example_col" id="example_col"></select>
           </div>
         </div>
 
         <div style="margin-top:1rem;display:flex;gap:.75rem;">
-          <button type="submit" class="btn">⬇️ Nhập dữ liệu</button>
+          <button type="submit" class="btn"><span class="iconify icon-download icon-16" style="margin-right:6px;"></span>Nhập dữ liệu</button>
           <a href="/" class="btn-ghost">Chọn file khác</a>
         </div>
       </form>
@@ -379,6 +330,7 @@
     </section>
   </main>
 
+  <script src="/static/file_upload.js"></script>
   <script>
     const formDetect = document.getElementById('form-detect');
     const formImport = document.getElementById('form-import');
@@ -387,7 +339,7 @@
     const previewInfo = document.getElementById('preview-info');
     const sampleTableDiv = document.getElementById('sample-table');
 
-    formDetect.addEventListener('submit', async (e) => {
+  formDetect.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(formDetect);
       const resp = await fetch('/preview', { method: 'POST', body: fd });
@@ -398,11 +350,15 @@
       const sugWord = data.mapping.word || '(chưa phát hiện)';
       const sugMeaning = data.mapping.meaning || '(chưa phát hiện)';
       const sugPos = data.mapping.pos || '(không bắt buộc)';
+      const sugPronunciation = data.mapping.pronunciation || '(không bắt buộc)';
+      const sugExample = data.mapping.example || '(không bắt buộc)';
       previewInfo.innerHTML = `<div class="badge badge-info">Gợi ý tự động</div>
         <div class='muted' style='margin-top:.5rem;'>
         • Từ vựng: <strong>${sugWord}</strong><br/>
         • Nghĩa: <strong>${sugMeaning}</strong><br/>
         • Loại từ: <strong>${sugPos}</strong><br/>
+        • Phiên âm: <strong>${sugPronunciation}</strong><br/>
+        • Ví dụ: <strong>${sugExample}</strong><br/>
         <em>Bạn có thể thay đổi ở dropdown bên dưới nếu không đúng.</em></div>`;
 
       formImport.querySelector('input[name=set_name]').value = data.set_name;
@@ -417,6 +373,8 @@
       fillSelect('word_col', data.mapping.word);
       fillSelect('meaning_col', data.mapping.meaning);
       fillSelect('pos_col', data.mapping.pos);
+      fillSelect('pronunciation_col', data.mapping.pronunciation);
+      fillSelect('example_col', data.mapping.example);
 
       if(Array.isArray(data.sample) && data.sample.length){
         let html = '<h3 style="margin-top:0;">Xem trước dữ liệu (5 dòng đầu)</h3><div class="table border" style="overflow:auto; border-radius:12px;"><table style="width:100%; border-collapse:collapse;">\n<thead><tr>';
@@ -426,6 +384,8 @@
           if(c === data.mapping.word) badge = ' 🔤';
           if(c === data.mapping.meaning) badge = ' 📖';
           if(c === data.mapping.pos) badge = ' 🏷️';
+          if(c === data.mapping.pronunciation) badge = ' 🗣️';
+          if(c === data.mapping.example) badge = ' 💬';
           html += `<th style="border-bottom:1px solid var(--border);text-align:left;">${c}${badge}</th>`; 
         }
         html += '</tr></thead><tbody>';
@@ -438,7 +398,7 @@
       window.scrollTo({ top: step2.offsetTop - 16, behavior: 'smooth' });
     });
 
-    formImport.addEventListener('submit', async (e) => {
+  formImport.addEventListener('submit', async (e) => {
       e.preventDefault();
       const fd = new FormData(formImport);
       const resp = await fetch('/import', { method: 'POST', body: fd });
@@ -447,12 +407,12 @@
       if(data.error){ alert(data.error); return; }
       step3.style.display = 'block';
       document.getElementById('import-result').innerHTML = `
-        <p>✅ <strong>Nhập thành công!</strong></p>
+  <p><span class="iconify icon-check icon-18 icon-success" style="margin-right:6px;"></span><strong>Nhập thành công!</strong></p>
         <p>Đã thêm ${data.inserted} từ (bỏ qua ${data.skipped} dòng rỗng)</p>
         <div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap;">
-          <a href="/sets/${data.set_id}" class="btn">📖 Xem chi tiết bộ từ</a>
-          <a href="/study/${data.set_id}?mode=select" class="btn" style="background:var(--success);">🎯 Học ngay</a>
-          <a href="/sets" class="btn-ghost">📚 Xem tất cả bộ từ</a>
+          <a href="/sets/${data.set_id}" class="btn"><span class="iconify icon-book icon-16" style="margin-right:6px;"></span>Xem chi tiết bộ từ</a>
+          <a href="/study/${data.set_id}?mode=select" class="btn" style="background:var(--success);"><span class="iconify icon-target icon-16" style="margin-right:6px;"></span>Học ngay</a>
+          <a href="/sets" class="btn-ghost"><span class="iconify icon-collection icon-16 icon-gradient-accent" style="margin-right:6px;"></span>Xem tất cả bộ từ</a>
         </div>
       `;
       window.scrollTo({ top: step3.offsetTop - 16, behavior: 'smooth' });
@@ -460,5 +420,6 @@
   </script>
 </body>
 </html>
+
 
 
