@@ -89,6 +89,25 @@ html, body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Prevent text cursor on clickable elements */
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection only in content areas */
+p, span, h1, h2, h3, h4, h5, h6, 
+input, textarea, pre, code,
+.term, .definition, .description, 
+.card-description, .post-caption,
+.page-header p, .muted {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  cursor: text;
 }
 
 /* Typography - Instagram style */
@@ -125,6 +144,19 @@ a:active,
 a:focus {
   text-decoration: none;
   color: inherit;
+  cursor: pointer;
+}
+
+/* Ensure all interactive elements have pointer cursor */
+button, .btn, .nav-btn, .action-btn,
+.card:hover, .set-item:hover,
+.choice, .rating-btn,
+label[for], .custum-file-upload {
+  cursor: pointer !important;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* Layout: Sidebar + Main */
@@ -939,7 +971,7 @@ header {
 }
 
 .header-content {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -984,16 +1016,21 @@ header {
 }
 
 .nav-btn {
-  padding: 8px 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
   background: none;
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 1.1em; /* restore slightly larger nav text */
+  line-height: 1.1;
   color: var(--text);
   text-decoration: none;
-  transition: all 0.2s;
-  font-weight: 400;
+  transition: all 0.18s ease;
+  font-weight: 600; /* bold text as before */
 }
 
 .nav-btn:hover {
@@ -1001,7 +1038,424 @@ header {
 }
 
 .nav-btn.active {
+  font-weight: 700;
+}
+
+/* Gradient text matching each icon when active */
+.nav-btn.active {
+  background: linear-gradient(135deg, #ff9800, #d84315);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Feed icon gradient: orange to deep orange */
+.nav-btn.active[href="/feed"] {
+  background: linear-gradient(135deg, #ff9800, #d84315);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Collection icon gradient: coral to peach */
+.nav-btn.active[href="/sets"] {
+  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Chart icon gradient: yellow to red */
+.nav-btn.active[href="/dashboard"] {
+  background: linear-gradient(135deg, #ffc107, #f44336);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Account icon gradient: deep orange to orange */
+.nav-btn.active[href="/profile"] {
+  background: linear-gradient(135deg, #e65100, #ffb74d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Settings icon gradient: orange to red */
+.nav-btn.settings-link.active .label,
+.nav-btn.active[href="/settings"] {
+  background: linear-gradient(135deg, #ff9800, #f44336);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Ensure dark mode keeps gradient visibility */
+[data-theme="dark"] .nav-btn.active {
+  background: linear-gradient(135deg, #ff9800, #d84315);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="dark"] .nav-btn.active[href="/feed"] {
+  background: linear-gradient(135deg, #ff9800, #d84315);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="dark"] .nav-btn.active[href="/sets"] {
+  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="dark"] .nav-btn.active[href="/dashboard"] {
+  background: linear-gradient(135deg, #ffc107, #f44336);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="dark"] .nav-btn.active[href="/profile"] {
+  background: linear-gradient(135deg, #e65100, #ffb74d);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="dark"] .nav-btn.settings-link.active .label,
+[data-theme="dark"] .nav-btn.active[href="/settings"] {
+  background: linear-gradient(135deg, #ff9800, #f44336);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: currentColor;
+  border-radius: 3px 3px 0 0;
+}
+
+/* SVG icon alignment/tuning inside nav buttons */
+.nav-btn svg.icon,
+.nav-btn .icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  flex-shrink: 0;
+  color: currentColor;
+  transform: translateY(1px); /* subtle vertical optical alignment */
+}
+
+/* ================= GLOBAL MONOCHROME ICON SYSTEM ================= */
+/* Mục tiêu: mọi icon SVG hiển thị đồng nhất màu với chữ/top-header (currentColor) và tự thích ứng dark/light. */
+/* Sử dụng kỹ thuật CSS mask để áp dụng màu hiện tại thay vì giữ nguyên fill gốc file SVG. */
+.iconify {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  background-color: currentColor; /* kế thừa từ cha (ví dụ nav-btn, tiêu đề, muted…) */
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  vertical-align: -4px; /* căn chuẩn so với baseline văn bản */
+  transition: color .25s ease, opacity .25s ease, transform .2s ease;
+}
+
+/* Kích thước tiện ích */
+.icon-14 { width:14px; height:14px; vertical-align:-2px; }
+.icon-16 { width:16px; height:16px; vertical-align:-3px; }
+.icon-18 { width:18px; height:18px; vertical-align:-3px; }
+.icon-20 { width:20px; height:20px; vertical-align:-4px; }
+.icon-22 { width:22px; height:22px; vertical-align:-4px; }
+.icon-24 { width:24px; height:24px; vertical-align:-5px; }
+.icon-26 { width:26px; height:26px; vertical-align:-6px; }
+.icon-28 { width:28px; height:28px; vertical-align:-6px; }
+.icon-24 { width:24px; height:24px; vertical-align:-5px; }
+.icon-32 { width:32px; height:32px; vertical-align:-6px; }
+.icon-36 { width:36px; height:36px; vertical-align:-6px; }
+.icon-40 { width:40px; height:40px; vertical-align:-6px; }
+.icon-48 { width:48px; height:48px; vertical-align:-8px; }
+
+/* Trạng thái & màu sắc tiện ích */
+.icon-muted { color: var(--text-secondary); }
+.icon-danger { color: var(--danger); }
+.icon-warning { color: var(--warning); }
+.icon-success { color: var(--success); }
+
+/* Hover chung cho icon trong nút/link */
+a:hover .iconify, button:hover .iconify { opacity: .75; }
+button:active .iconify, a:active .iconify { transform: scale(.92); }
+
+/* Gradient utilities to match top-header active accent */
+.icon-gradient-accent { 
+  background: linear-gradient(135deg, #ff9800, #d84315); 
+}
+
+/* Map mask cho từng tên icon dùng ở dashboard & các trang đã triển khai */
+.icon-chart { -webkit-mask-image: url('/static/icon_chart.svg'); mask-image: url('/static/icon_chart.svg'); }
+.icon-upload { -webkit-mask-image: url('/static/icon_upload.svg'); mask-image: url('/static/icon_upload.svg'); }
+.icon-book { -webkit-mask-image: url('/static/icon_book.svg'); mask-image: url('/static/icon_book.svg'); }
+.icon-target { -webkit-mask-image: url('/static/icon_target.svg'); mask-image: url('/static/icon_target.svg'); }
+.icon-collection { -webkit-mask-image: url('/static/icon_collection.svg'); mask-image: url('/static/icon_collection.svg'); }
+.icon-note { -webkit-mask-image: url('/static/icon_note.svg'); mask-image: url('/static/icon_note.svg'); }
+.icon-clock { -webkit-mask-image: url('/static/icon_clock.svg'); mask-image: url('/static/icon_clock.svg'); }
+.icon-school { -webkit-mask-image: url('/static/icon_school.svg'); mask-image: url('/static/icon_school.svg'); }
+.icon-fire { -webkit-mask-image: url('/static/icon_fire.svg'); mask-image: url('/static/icon_fire.svg'); }
+.icon-rocket { -webkit-mask-image: url('/static/icon_rocket.svg'); mask-image: url('/static/icon_rocket.svg'); }
+.icon-cards { -webkit-mask-image: url('/static/icon_cards.svg'); mask-image: url('/static/icon_cards.svg'); }
+.icon-lightbulb { -webkit-mask-image: url('/static/icon_lightbulb.svg'); mask-image: url('/static/icon_lightbulb.svg'); }
+.icon-brain { -webkit-mask-image: url('/static/icon_brain.svg'); mask-image: url('/static/icon_brain.svg'); }
+
+/* Có thể mở rộng tiếp cho các trang khác: heart, heart-filled, plus, edit, delete, etc. */
+.icon-heart { -webkit-mask-image: url('/static/icon_heart.svg'); mask-image: url('/static/icon_heart.svg'); }
+.icon-heart-filled { -webkit-mask-image: url('/static/icon_heart_filled.svg'); mask-image: url('/static/icon_heart_filled.svg'); }
+.icon-comment { -webkit-mask-image: url('/static/icon_comment.svg'); mask-image: url('/static/icon_comment.svg'); }
+.icon-share { -webkit-mask-image: url('/static/icon_share.svg'); mask-image: url('/static/icon_share.svg'); }
+.icon-plus { -webkit-mask-image: url('/static/icon_plus.svg'); mask-image: url('/static/icon_plus.svg'); }
+.icon-edit { -webkit-mask-image: url('/static/icon_edit.svg'); mask-image: url('/static/icon_edit.svg'); }
+.icon-delete { -webkit-mask-image: url('/static/icon_delete.svg'); mask-image: url('/static/icon_delete.svg'); }
+.icon-globe { -webkit-mask-image: url('/static/icon_globe.svg'); mask-image: url('/static/icon_globe.svg'); }
+.icon-private { -webkit-mask-image: url('/static/icon_private.svg'); mask-image: url('/static/icon_private.svg'); }
+.icon-lock-line { -webkit-mask-image: url('/static/icon_lock.svg'); mask-image: url('/static/icon_lock.svg'); }
+.icon-public { -webkit-mask-image: url('/static/icon_public.svg'); mask-image: url('/static/icon_public.svg'); }
+.icon-search { -webkit-mask-image: url('/static/icon_search.svg'); mask-image: url('/static/icon_search.svg'); }
+.icon-eye { -webkit-mask-image: url('/static/icon_eye.svg'); mask-image: url('/static/icon_eye.svg'); }
+.icon-star { -webkit-mask-image: url('/static/icon_star.svg'); mask-image: url('/static/icon_star.svg'); }
+.icon-warning { -webkit-mask-image: url('/static/icon_warning.svg'); mask-image: url('/static/icon_warning.svg'); }
+.icon-error { -webkit-mask-image: url('/static/icon_error.svg'); mask-image: url('/static/icon_error.svg'); }
+.icon-check { -webkit-mask-image: url('/static/icon_check.svg'); mask-image: url('/static/icon_check.svg'); }
+.icon-camera { -webkit-mask-image: url('/static/icon_camera.svg'); mask-image: url('/static/icon_camera.svg'); }
+.icon-message { -webkit-mask-image: url('/static/icon_message.svg'); mask-image: url('/static/icon_message.svg'); }
+.icon-location { -webkit-mask-image: url('/static/icon_location.svg'); mask-image: url('/static/icon_location.svg'); }
+.icon-link { -webkit-mask-image: url('/static/icon_link.svg'); mask-image: url('/static/icon_link.svg'); }
+.icon-facebook { -webkit-mask-image: url('/static/icon_facebook.svg'); mask-image: url('/static/icon_facebook.svg'); }
+.icon-instagram { -webkit-mask-image: url('/static/icon_instagram.svg'); mask-image: url('/static/icon_instagram.svg'); }
+.icon-twitter { -webkit-mask-image: url('/static/icon_twitter.svg'); mask-image: url('/static/icon_twitter.svg'); }
+.icon-calendar { -webkit-mask-image: url('/static/icon_calendar.svg'); mask-image: url('/static/icon_calendar.svg'); }
+.icon-bookmark { -webkit-mask-image: url('/static/icon_bookmark.svg'); mask-image: url('/static/icon_bookmark.svg'); }
+.icon-bookmark-filled { -webkit-mask-image: url('/static/icon_bookmark_filled.svg'); mask-image: url('/static/icon_bookmark_filled.svg'); }
+.icon-more { -webkit-mask-image: url('/static/icon_more.svg'); mask-image: url('/static/icon_more.svg'); }
+.icon-cards { -webkit-mask-image: url('/static/icon_cards.svg'); mask-image: url('/static/icon_cards.svg'); }
+.icon-folder { -webkit-mask-image: url('/static/icon_folder.svg'); mask-image: url('/static/icon_folder.svg'); }
+.icon-user { -webkit-mask-image: url('/static/icon_user.svg'); mask-image: url('/static/icon_user.svg'); }
+.icon-tag { -webkit-mask-image: url('/static/icon_tag.svg'); mask-image: url('/static/icon_tag.svg'); }
+.icon-voice { -webkit-mask-image: url('/static/icon_voice.svg'); mask-image: url('/static/icon_voice.svg'); }
+.icon-download { -webkit-mask-image: url('/static/icon_download.svg'); mask-image: url('/static/icon_download.svg'); }
+.icon-settings { -webkit-mask-image: url('/static/icon_settings.svg'); mask-image: url('/static/icon_settings.svg'); }
+
+/* Dark mode: vẫn dùng currentColor nên không cần đổi; chỉ đảm bảo contrast tốt. */
+[data-theme="dark"] .icon-muted { color: var(--text-secondary); }
+
+
+/* Ensure logout link keeps danger color while bold */
+.nav-btn.logout { color: var(--danger); font-weight: 600; }
+.nav-btn.logout:hover { background: rgba(237,73,86,0.08); }
+
+/* User avatar in header navigation - high quality rendering */
+.user-avatar-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.user-avatar,
+.user-avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.user-avatar-img {
+  object-fit: cover;
+  border: 2px solid var(--border);
+  transition: all 0.2s ease;
+  /* High quality image rendering */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.user-avatar-img:hover {
+  transform: scale(1.08);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+.user-avatar {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: 2px solid var(--border);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.user-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+}
+
+/* Standalone back button (outside nav) */
+.back-button-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 20px 0;
+}
+
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-decoration: none;
   font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background: var(--bg);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateX(-3px);
+}
+
+.back-button svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Animated Search Form - Simplified */
+.search-form {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: 30px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.search-form:focus-within {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-form button {
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+  outline: none;
+}
+
+.search-form button:hover {
+  color: #667eea;
+}
+
+.search-form button:focus {
+  outline: none;
+}
+
+.search-form .input {
+  font-size: 0.95rem;
+  background: transparent;
+  flex: 1;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: none;
+  color: var(--text);
+  font-family: inherit;
+  outline: none;
+  box-shadow: none;
+}
+
+.search-form .input:focus {
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+.search-form .input::placeholder {
+  color: var(--text);
+}
+
+.search-form .reset {
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+  outline: none;
+}
+
+.search-form .reset:hover {
+  color: #ef4444;
+}
+
+.search-form .reset:focus {
+  outline: none;
+}
+
+.search-form input:not(:placeholder-shown) ~ .reset {
+  display: flex;
+}
+
+.search-form svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  pointer-events: none;
 }
 
 /* ========== SHARED CONTAINER ========== */
@@ -1033,4 +1487,96 @@ header {
   color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.6;
+}
+
+/* Reusable custom file upload (Uiverse.io by Yaya12085) */
+.custum-file-upload {
+  height: 200px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #cacaca;
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0px 48px 35px -48px rgba(0,0,0,0.1);
+}
+.custum-file-upload .icon { display:flex; align-items:center; justify-content:center; }
+.custum-file-upload .icon svg { height:80px; fill: rgba(75,85,99,1); }
+.custum-file-upload .text { display:flex; align-items:center; justify-content:center; }
+.custum-file-upload .text span { font-weight: 600; color: rgba(75,85,99,1); }
+.custum-file-upload input { display:none; }
+/* Focus outline when using keyboard */
+.custum-file-upload.upload-focus { outline: 3px solid rgba(102,126,234,0.25); outline-offset: 2px; }
+.custum-file-upload.drag-active {
+  border-color: #667eea;
+  background: rgba(102,126,234,0.05);
+}
+
+/* ========== ENHANCED FEATURES ========== */
+html { scroll-behavior: smooth; }
+body.page-transition { opacity: 0; transition: opacity 0.2s ease; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(400px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideOutRight { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(400px); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes shimmer { 0% { background-position: -468px 0; } 100% { background-position: 468px 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.skeleton { background: linear-gradient(90deg, var(--border-light) 0%, var(--border) 50%, var(--border-light) 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); }
+.skeleton-text { height: 16px; margin-bottom: 8px; width: 100%; }
+.skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-card { height: 200px; border-radius: var(--radius-md); margin-bottom: 16px; }
+*:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--radius-sm); }
+::selection { background: var(--primary); color: white; }
+::-moz-selection { background: var(--primary); color: white; }
+.loading-spinner { width: 48px; height: 48px; border: 4px solid rgba(255, 255, 255, 0.2); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+.theme-toggle { width: 40px; height: 40px; border: none; background: transparent; color: var(--text); cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; padding: 0; margin: 0; }
+.theme-toggle:hover { background: var(--sidebar-hover); transform: scale(1.1); }
+.theme-toggle svg { transition: transform 0.3s ease; }
+.has-image { border: 2px solid var(--success) !important; animation: scaleIn 0.3s ease; }
+.dragover { border: 2px dashed var(--primary) !important; background: var(--sidebar-hover) !important; transform: scale(1.02); }
+.card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.card-hover:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.btn-loading { position: relative; pointer-events: none; opacity: 0.7; }
+.btn-loading::after { content: ''; position: absolute; width: 16px; height: 16px; top: 50%; left: 50%; margin-left: -8px; margin-top: -8px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; }
+
+/* Theme Toggle Button */
+.theme-toggle {
+    transition: transform 0.3s ease, opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    color: var(--text);
+}
+
+.theme-toggle:hover {
+    opacity: 0.8;
+}
+
+.theme-toggle svg {
+    transition: all 0.3s ease;
+}
+
+/* Smooth theme transition */
+[data-theme="dark"] {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+[data-theme="light"] {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Brand Logo + Compact Search */
+.logo-icon { width: 32px; height: 32px; display: block; }
+.top-header .compact-search { max-width: 280px; width: 280px; }
+@media (max-width: 768px) {
+  .top-header .compact-search { max-width: 180px; width: 180px; }
 }

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bộ từ - {{ profile_user.display_name }} - VocabApp</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/base.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* Profile Container */
+        .profile-container {
+            max-width: 940px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Cover Photo - Compact version */
+        .cover-photo {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cover-photo-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3em;
+            font-weight: 700;
+        }
+
+        /* Profile Header - Compact */
+        .profile-header {
+            padding: 0 32px;
+            position: relative;
+        }
+
+        .profile-header-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #e4e6eb;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid white;
+            background: white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #050505;
+            margin-bottom: 4px;
+        }
+
+        .profile-name:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 12px;
+            color: #65676b;
+            font-size: 0.9em;
+        }
+
+        .profile-stat {
+            cursor: pointer;
+        }
+
+        .profile-stat:hover {
+            text-decoration: underline;
+        }
+
+        .profile-stat strong {
+            color: #050505;
+            font-weight: 600;
+        }
+
+        /* Profile Navigation */
+        .profile-nav {
+            display: flex;
+            gap: 8px;
+            padding: 0 32px;
+        }
+
+        .profile-nav-item {
+            padding: 16px 16px;
+            color: #65676b;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .profile-nav-item:hover {
+            background: #f2f3f5;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .profile-nav-item.active {
+            color: #1877f2;
+            border-bottom-color: #1877f2;
+        }
+
+        /* Sets Grid */
+        .sets-container {
+            max-width: 940px;
+            margin: 16px auto;
+            padding: 0 16px;
+        }
+
+        .sets-header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .sets-header h2 {
+            font-size: 1.5em;
+            margin-bottom: 8px;
+        }
+
+        .sets-header p {
+            color: #65676b;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            border-bottom: 2px solid #e4e6eb;
+        }
+
+        .filter-tab {
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: #65676b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .filter-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .sets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .set-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .set-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .set-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .set-visibility {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+        }
+
+        .set-visibility.public {
+            background: #e7f3ff;
+            color: #1877f2;
+        }
+
+        .set-visibility.private {
+            background: #f0f2f5;
+            color: #65676b;
+        }
+
+        .set-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #050505;
+            margin-bottom: 8px;
+        }
+
+        .set-description {
+            color: #65676b;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .set-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.85em;
+            color: #65676b;
+            margin-bottom: 12px;
+        }
+
+        .set-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .set-stats {
+            display: flex;
+            gap: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e4e6eb;
+            font-size: 0.85em;
+            color: #65676b;
+        }
+
+        .set-stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .set-actions {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+        }
+
+        .set-menu-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f0f2f5;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            color: #65676b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .set-menu-btn:hover {
+            background: #e4e6eb;
+        }
+
+        /* Empty State */
+        .empty-sets {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .empty-sets h3 {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .empty-sets p {
+            color: #65676b;
+            margin-bottom: 20px;
+        }
+
+        .btn-create {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                padding: 0 16px;
+            }
+
+            .profile-nav {
+                padding: 0 16px;
+            }
+
+            .cover-photo {
+                height: 150px;
+            }
+
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+            }
+
+            .sets-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <!-- Profile Container -->
+    <div class="profile-container">
+        <!-- Cover Photo - Compact -->
+        <div class="cover-photo">
+            {% if profile_user.cover_image %}
+            <img src="{{ profile_user.cover_image }}" alt="Cover">
+            {% else %}
+            <div class="cover-photo-placeholder">
+                {{ profile_user.display_name[0].upper() }}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Profile Header - Compact -->
+        <div class="profile-header">
+            <div class="profile-header-content">
+                <div class="profile-avatar">
+                    {% if profile_user.avatar %}
+                    <img src="{{ profile_user.avatar }}" alt="{{ profile_user.display_name }}">
+                    {% else %}
+                    <div class="profile-avatar-placeholder">
+                        {{ profile_user.display_name[0].upper() }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="profile-info">
+                    <h1 class="profile-name" onclick="window.location.href='/user/{{ profile_user.username }}'">
+                        {{ profile_user.display_name }}
+                    </h1>
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <strong>{{ followers_count }}</strong> người theo dõi
+                        </div>
+                        <div class="profile-stat">
+                            <strong>{{ sets_count }}</strong> bộ từ
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Navigation -->
+        <div class="profile-nav">
+            <a href="/user/{{ profile_user.username }}" class="profile-nav-item">Bài viết</a>
+            <a href="/user/{{ profile_user.username }}/sets" class="profile-nav-item active">Bộ từ</a>
+            <a href="/user/{{ profile_user.username }}/about" class="profile-nav-item">Giới thiệu</a>
+        </div>
+    </div>
+
+    <!-- Sets Container -->
+    <div class="sets-container">
+        <div class="sets-header">
+            <h2>📚 Bộ từ vựng</h2>
+            <p>{{ sets_count }} bộ từ</p>
+            
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterSets('all')">Tất cả ({{ sets_count }})</button>
+                <button class="filter-tab" onclick="filterSets('public')">Công khai ({{ public_count }})</button>
+                <button class="filter-tab" onclick="filterSets('private')">Riêng tư ({{ private_count }})</button>
+            </div>
+        </div>
+
+        {% if sets %}
+        <div class="sets-grid" id="setsGrid">
+            {% for set in sets %}
+            <div class="set-card" data-visibility="{{ set.visibility }}" onclick="window.location.href='/sets/{{ set.id }}'">
+                <div class="set-card-header">
+                    <span class="set-visibility {{ set.visibility }}">
+                        {% if set.visibility == 'public' %}🌐 Công khai{% else %}🔒 Riêng tư{% endif %}
+                    </span>
+                </div>
+
+                <div class="set-title">{{ set.name }}</div>
+                
+                {% if set.description %}
+                <div class="set-description">{{ set.description }}</div>
+                {% endif %}
+
+                <div class="set-meta">
+                    <div class="set-meta-item">
+                        <span>📚</span>
+                        <span>{{ set.term_count }} từ</span>
+                    </div>
+                    <div class="set-meta-item">
+                        <span>🌐</span>
+                        <span>{{ set.language_from }} → {{ set.language_to }}</span>
+                    </div>
+                </div>
+
+                <div class="set-stats">
+                    <div class="set-stat">
+                        <span>❤️</span>
+                        <span>{{ set.likes_count or 0 }}</span>
+                    </div>
+                    <div class="set-stat">
+                        <span>💬</span>
+                        <span>{{ set.comments_count or 0 }}</span>
+                    </div>
+                    <div class="set-stat">
+                        <span>📥</span>
+                        <span>{{ set.shares_count or 0 }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-sets">
+            <h3>📚 Chưa có bộ từ nào</h3>
+            <p>
+                {% if is_own_profile %}
+                Hãy tạo bộ từ đầu tiên của bạn!
+                {% else %}
+                {{ profile_user.display_name }} chưa tạo bộ từ nào.
+                {% endif %}
+            </p>
+            {% if is_own_profile %}
+            <a href="/sets/create" class="btn-create">Tạo bộ từ mới</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function filterSets(type) {
+            const cards = document.querySelectorAll('.set-card');
+            const tabs = document.querySelectorAll('.filter-tab');
+            
+            // Update active tab
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter cards
+            cards.forEach(card => {
+                if (type === 'all') {
+                    card.style.display = 'block';
+                } else {
+                    const visibility = card.getAttribute('data-visibility');
+                    card.style.display = visibility === type ? 'block' : 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

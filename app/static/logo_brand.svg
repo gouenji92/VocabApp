@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="128" height="128">
+  <defs>
+    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#833ab4"/>
+      <stop offset="50%" stop-color="#e1306c"/>
+      <stop offset="100%" stop-color="#fcb045"/>
+    </linearGradient>
+    <linearGradient id="grad2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e1306c"/>
+      <stop offset="100%" stop-color="#fd1d1d"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer circle -->
+  <circle cx="256" cy="220" r="190" fill="none" stroke="url(#grad)" stroke-width="22"/>
+  <!-- Open book -->
+  <path d="M96 300c48-44 96-66 160-66s112 22 160 66" fill="none" stroke="url(#grad)" stroke-width="20" stroke-linecap="round"/>
+  <path d="M156 204c24 20 48 62 100 148c52-86 76-128 100-148" fill="none" stroke="url(#grad)" stroke-width="22" stroke-linecap="round"/>
+  <!-- V center -->
+  <path d="M212 160l44 96l44-96" fill="none" stroke="url(#grad2)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Leaf on the right -->
+  <path d="M360 140c24 0 44 18 44 42c-30 10-56-6-44-42z" fill="url(#grad)"/>
+  <!-- Page tips -->
+  <path d="M110 234l30-18M402 234l-30-18" stroke="url(#grad)" stroke-width="12" stroke-linecap="round"/>
+</svg>

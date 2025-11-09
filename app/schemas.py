@@ -18,6 +18,7 @@ class VocabTerm(BaseModel):
     term: str
     definition: str
     pos: Optional[str] = None
+    pronunciation: Optional[str] = None
     example: Optional[str] = None
 
 class ImportPreview(BaseModel):

@@ -1,0 +1,17 @@
+<svg width="24" height="24" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradCollection" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff7e5f" />
+      <stop offset="100%" stop-color="#feb47b" />
+    </linearGradient>
+  </defs>
+  <g stroke="url(#gradCollection)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 12 h36 v40 a4 4 0 0 1 -4 4 h-36 a4 4 0 0 1 -4 -4 v-36" />
+    <rect x="12" y="4" width="36" height="48" rx="2" fill="#fff" stroke="url(#gradCollection)"/>
+    <polygon points="30 12 34 20 42 20 36 26 38 34 30 29 22 34 24 26 18 20 26 20" />
+    <line x1="20" y1="40" x2="40" y2="40" />
+    <line x1="20" y1="46" x2="34" y2="46" />
+    <line x1="20" y1="52" x2="30" y2="52" />
+    <path d="M42 48 l-4 -4 l12 -12 l4 4 l-12 12 z M42 48 l-6 6 l6 -2 z" fill="#fff"/>
+  </g>
+</svg>

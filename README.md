@@ -58,6 +58,8 @@ docker run --rm -p 8000:8000 --env-file .env vocabapp:latest
 - Tự động nhận diện cột: Từ vựng (Term), Loại từ (POS), Nghĩa (Definition), Ví dụ (Example)
 - Preview và điều chỉnh mapping trước khi import
 - Hỗ trợ cả tiếng Anh và tiếng Việt trong header
+- Kéo & Thả file trực tiếp vào vùng upload (drag & drop)
+- Dán (Ctrl+V) ảnh hoặc file từ clipboard vào vùng upload
 
 ### 📚 Quản lý bộ từ
 - Tạo, xem, sửa, xóa bộ từ (vocabulary sets)
@@ -352,6 +354,7 @@ VocabApp sử dụng thuật toán SM-2 để tối ưu hóa việc ôn tập:
 - Max file size: Không giới hạn mặc định (configure trong FastAPI)
 - Supported formats: CSV, XLSX
 - Encoding: UTF-8 recommended
+- Hỗ trợ drag & drop + paste: Di chuột kéo file vào khung hoặc dùng Ctrl+V sau khi chụp ảnh màn hình
 
 ## 🚧 Roadmap (Tương lai)
 

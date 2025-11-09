@@ -11,73 +11,7 @@
       background: #f0f2f5;
       min-height: 100vh;
     }
-    .top-header {
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 12px 20px;
-    }
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-    .logo {
-      font-size: 1.8em;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-decoration: none;
-    }
-    .nav-icons {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-    .nav-btn {
-      padding: 8px 16px;
-      background: none;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1.1em;
-      color: #333;
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-    .nav-btn:hover {
-      background: #f0f2f5;
-    }
-
-    .nav-btn svg.icon {
-      width: 22px;
-      height: 22px;
-      flex-shrink: 0;
-      vertical-align: middle;
-    }
-    .nav-btn.active {
-      color: #667eea;
-      font-weight: 600;
-    }
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 700;
-      font-size: 1em;
-    }
+    /* Header styles centralized in /static/base.css */
     .container { max-width: 1000px; margin: 2rem auto; padding: 0 2rem; }
     .header-card {
       background: white;
@@ -252,55 +186,45 @@
   </style>
 </head>
 <body>
-  <div class="top-header">
-    <div class="header-content">
-      <a href="/" class="logo">VocabApp</a>
-      <div class="nav-icons">
-        <a href="/feed" class="nav-btn" title="Feed"><span class="icon">🏠</span> Feed</a>
-        <a href="/sets" class="nav-btn active" title="Bộ từ của tôi"><span class="icon">📚</span> Bộ từ</a>
-        <a href="/dashboard" class="nav-btn" title="Thống kê"><span class="icon">📊</span> Thống kê</a>
-        <a href="/profile" class="nav-btn" title="Tài khoản">
-          {% if user and user.avatar %}
-            <img src="{{ user.avatar }}" alt="Avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid #e5e7eb;" />
-          {% else %}
-            <div class="user-avatar" title="{{ username }}">{{ username[0].upper() }}</div>
-          {% endif %}
-          <span class="icon">👤</span> Tài khoản
-        </a>
-        <a href="/logout" class="nav-btn" style="color:#ef4444;font-weight:600;" title="Đăng xuất">Đăng xuất</a></div>
-    </div>
+  {% set active_page = 'sets' %}
+  {% include 'header.html' %}
+  
+  <div class="back-button-container">
+    <button onclick="history.back()" class="back-button">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 8L5 16L13 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 16H27C35 16 41 22 41 30C41 38 35 44 27 44H21" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Quay lại
+    </button>
   </div>
   
   <div class="container">
     <div class="header-card">
-      <h1>📖 {{ vset.name }}</h1>
+  <h1><span class="iconify icon-book icon-28 icon-gradient-accent" style="margin-right:8px;width:28px;height:28px;vertical-align:-6px;"></span>{{ vset.name }}</h1>
       <p class="description">{{ vset.description or 'Không có mô tả' }}</p>
       <p class="meta"><strong>Ngôn ngữ:</strong> {{ vset.language_from }} → {{ vset.language_to }}</p>
       
       <div class="actions">
-        <a href="/sets" class="btn btn-ghost">← Quay lại</a>
-        <a href="/study/{{ vset.id }}?mode=select" class="btn">🎯 Học ngay</a>
-        <a href="/sets/{{ vset.id }}/export?format=csv" class="btn" style="background: linear-gradient(135deg,#06b6d4,#0ea5e9);">💾 CSV</a>
-        <a href="/sets/{{ vset.id }}/export?format=xlsx" class="btn" style="background: linear-gradient(135deg,#8b5cf6,#a78bfa);">📊 Excel</a>
-        <a href="/sets/{{ vset.id }}/edit" class="btn" style="background: linear-gradient(135deg,#f59e0b,#fbbf24);">✏️ Sửa</a>
+  <a href="/study/{{ vset.id }}?mode=select" class="btn"><span class="iconify icon-brain icon-18 icon-gradient-accent" style="margin-right:6px;"></span>Học ngay</a>
+  <a href="/sets/{{ vset.id }}/export?format=csv" class="btn" style="background: linear-gradient(135deg,#06b6d4,#0ea5e9);"><span class="iconify icon-note icon-18" style="margin-right:6px;"></span>CSV</a>
+  <a href="/sets/{{ vset.id }}/export?format=xlsx" class="btn" style="background: linear-gradient(135deg,#8b5cf6,#a78bfa);"><span class="iconify icon-chart icon-18" style="margin-right:6px;"></span>Excel</a>
+  <a href="/sets/{{ vset.id }}/edit" class="btn" style="background: linear-gradient(135deg,#f59e0b,#fbbf24);"><span class="iconify icon-edit icon-18" style="margin-right:6px;"></span>Sửa</a>
         {% if vset.visibility == 'public' %}
         <form method="post" action="/sets/{{ vset.id }}/publish" style="grid-column: span 1;">
-          <button type="submit" class="btn" style="width:100%;background: linear-gradient(135deg,#10b981,#059669);">🔓 Public</button>
+          <button type="submit" class="btn" style="width:100%;background: linear-gradient(135deg,#10b981,#059669);"><span class="iconify icon-public icon-18" style="margin-right:6px;"></span>Public</button>
         </form>
         {% else %}
         <form method="post" action="/sets/{{ vset.id }}/publish" style="grid-column: span 1;">
-          <button type="submit" class="btn" style="width:100%;background: linear-gradient(135deg,#6b7280,#4b5563);">🔒 Private</button>
+          <button type="submit" class="btn" style="width:100%;background: linear-gradient(135deg,#6b7280,#4b5563);"><span class="iconify icon-private icon-18" style="margin-right:6px;"></span>Private</button>
         </form>
         {% endif %}
         <form method="post" action="/sets/{{ vset.id }}/delete" style="grid-column: span 1;" 
               onsubmit="return confirm('⚠️ Xóa bộ từ này và TẤT CẢ từ vựng bên trong?\n\nHành động này không thể hoàn tác!');">
-          <button type="submit" class="btn btn-danger" style="width:100%;">🗑️ Xóa</button>
+          <button type="submit" class="btn btn-danger" style="width:100%;"><span class="iconify icon-delete icon-18" style="margin-right:6px;"></span>Xóa</button>
         </form>
       </div>
     </div>
 
     <div class="section">
-      <h2>➕ Thêm từ mới</h2>
+  <h2><span class="iconify icon-plus icon-22 icon-gradient-accent" style="margin-right:6px;"></span>Thêm từ mới</h2>
       <form method="post" action="/sets/{{ vset.id }}/add-term" class="add-term-form">
         <div class="form-row">
           <div class="form-group">
@@ -320,13 +244,13 @@
           <label>Ví dụ (không bắt buộc)</label>
           <textarea name="example" placeholder="Câu ví dụ sử dụng từ này..."></textarea>
         </div>
-        <button type="submit" class="btn btn-success" style="margin-top: 1rem;">➕ Thêm từ</button>
+  <button type="submit" class="btn btn-success" style="margin-top: 1rem;"><span class="iconify icon-plus icon-16" style="margin-right:6px;"></span>Thêm từ</button>
       </form>
 
-      <h2>📚 Danh sách từ vựng ({{ terms|length }})</h2>
+  <h2><span class="iconify icon-collection icon-22 icon-gradient-accent" style="margin-right:6px;"></span>Danh sách từ vựng ({{ terms|length }})</h2>
       
       <div style="margin-bottom: 1rem;">
-        <input type="text" id="searchTerms" placeholder="🔍 Tìm kiếm từ vựng..." 
+  <input type="text" id="searchTerms" placeholder="Tìm kiếm từ vựng..." 
                style="width: 100%; padding: 0.7rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 0.95rem;"
                onkeyup="filterTerms()" />
       </div>
@@ -365,7 +289,7 @@
       </table>
       {% else %}
       <div class="empty-state">
-        <p>Chưa có thuật ngữ nào trong bộ từ này.</p>
+  <p>Chưa có thuật ngữ nào trong bộ từ này.</p>
       </div>
       {% endif %}
     </div>
@@ -397,5 +321,6 @@
   </script>
 </body>
 </html>
+
 
 

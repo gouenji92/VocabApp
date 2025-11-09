@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Tạo bộ từ mới - VocabApp</title>
+  <link rel="stylesheet" href="/static/base.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+
+    main { 
+      max-width: 960px; 
+      margin: 20px auto; 
+      padding: 0 20px 40px; 
+    }
+
+    .page-header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .page-header h1 {
+      font-size: 2em;
+      color: #050505;
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: #65676b;
+      font-size: 0.95em;
+      line-height: 1.6;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #050505;
+      margin-bottom: 8px;
+      font-size: 0.95em;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e4e6eb;
+      border-radius: 8px;
+      font-size: 0.95em;
+      margin-bottom: 16px;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      font-size: 0.95em;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-ghost {
+      padding: 12px 24px;
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s;
+      font-size: 0.95em;
+    }
+
+    .btn-ghost:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-add {
+      padding: 8px 16px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-top: 12px;
+    }
+
+    .btn-add:hover {
+      background: #218838;
+    }
+
+    .btn-remove {
+      padding: 6px 12px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85em;
+    }
+
+    .btn-remove:hover {
+      background: #c82333;
+    }
+
+    .term-item {
+      background: #f8f9fa;
+      border: 2px solid #e4e6eb;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .term-item h3 {
+      font-size: 1.1em;
+      color: #050505;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      
+      main {
+        padding: 0 16px 40px;
+      }
+
+      .page-header h1 {
+        font-size: 1.5em;
+      }
+
+      .card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="top-header">
+    <div class="header-content">
+      <a href="/" class="logo">VocabApp</a>
+      <div class="nav-icons">
+        <a href="/feed" class="nav-btn" title="Feed">
+          <svg class="icon" width="22" height="22" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 15L24 4L42 15V40C42 41.1046 41.1046 42 40 42H8C6.89543 42 6 41.1046 6 40V15Z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 42V24H31V42" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Feed
+        </a>
+        <a href="/sets" class="nav-btn" title="Bộ từ của tôi">
+          <svg class="icon" width="22" height="22" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 8H32V40H8V8Z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 8H40V40H32" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Bộ từ
+        </a>
+        <a href="/dashboard" class="nav-btn" title="Thống kê">
+          <svg class="icon" width="22" height="22" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 42V18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M18 42V6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M30 42V26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M42 42V12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+          Thống kê
+        </a>
+        <a href="/profile" class="nav-btn" title="Tài khoản">
+          <svg class="icon" width="22" height="22" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="12" r="8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Tài khoản
+        </a>
+        {% if user and user.avatar %}
+        <img src="{{ user.avatar }}" class="user-avatar-img" title="{{ user.display_name or username }}" />
+        {% else %}
+        <div class="user-avatar" title="{{ user.display_name if user else username }}">{{ username[0].upper() }}</div>
+        {% endif %}
+        
+        <a href="/logout" class="nav-btn logout" title="Đăng xuất">Đăng xuất</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="back-button-container">
+    <button onclick="history.back()" class="back-button">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 8L5 16L13 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 16H27C35 16 41 22 41 30C41 38 35 44 27 44H21" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Quay lại
+    </button>
+  </div>
+
+  <main>
+    <div class="page-header">
+      <h1>✨ Tạo bộ từ mới</h1>
+      <p>Nhập thông tin bộ từ và thêm các từ vựng trực tiếp trên web</p>
+    </div>
+
+    <form id="create-form" method="POST">
+      <div class="card">
+        <h2 style="margin-bottom: 16px;">📋 Thông tin bộ từ</h2>
+        
+        <label>Tên bộ từ *</label>
+        <input type="text" name="set_name" placeholder="Ví dụ: TOEIC Essential 500" required />
+
+        <label>Mô tả</label>
+        <textarea name="description" placeholder="Mô tả ngắn gọn về bộ từ này..."></textarea>
+
+        <div class="grid-2">
+          <div>
+            <label>Ngôn ngữ gốc</label>
+            <input type="text" name="language_from" value="en" placeholder="en" />
+          </div>
+          <div>
+            <label>Ngôn ngữ nghĩa</label>
+            <input type="text" name="language_to" value="vi" placeholder="vi" />
+          </div>
+        </div>
+
+        <label>Chế độ hiển thị</label>
+        <select name="visibility">
+          <option value="private">🔒 Riêng tư (chỉ mình tôi)</option>
+          <option value="public">🌍 Công khai (mọi người có thể xem)</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom: 16px;">📝 Danh sách từ vựng</h2>
+        <div id="terms-container">
+          <!-- Terms will be added here dynamically -->
+        </div>
+        <button type="button" class="btn-add" onclick="addTerm()">+ Thêm từ mới</button>
+      </div>
+
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <a href="/sets" class="btn-ghost">Hủy</a>
+        <button type="submit" class="btn">💾 Tạo bộ từ</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    let termCount = 0;
+
+    function addTerm() {
+      termCount++;
+      const container = document.getElementById('terms-container');
+      const termDiv = document.createElement('div');
+      termDiv.className = 'term-item';
+      termDiv.id = `term-${termCount}`;
+      termDiv.innerHTML = `
+        <h3>
+          <span>Từ #${termCount}</span>
+          <button type="button" class="btn-remove" onclick="removeTerm(${termCount})">× Xóa</button>
+        </h3>
+        <label>Từ vựng *</label>
+        <input type="text" name="terms[${termCount}][term]" placeholder="apple" required />
+        
+        <label>Nghĩa *</label>
+        <input type="text" name="terms[${termCount}][definition]" placeholder="quả táo" required />
+        
+        <div class="grid-2">
+          <div>
+            <label>Loại từ</label>
+            <input type="text" name="terms[${termCount}][pos]" placeholder="n, v, adj..." />
+          </div>
+          <div>
+            <label>Phiên âm</label>
+            <input type="text" name="terms[${termCount}][pronunciation]" placeholder="/ˈæpl/" />
+          </div>
+        </div>
+        
+        <label>Ví dụ</label>
+        <input type="text" name="terms[${termCount}][example]" placeholder="I eat an apple every day" />
+      `;
+      container.appendChild(termDiv);
+    }
+
+    function removeTerm(id) {
+      const elem = document.getElementById(`term-${id}`);
+      if (elem) {
+        elem.remove();
+      }
+    }
+
+    // Add first term by default
+    addTerm();
+
+    // Handle form submission
+    document.getElementById('create-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      
+      try {
+        const resp = await fetch('/sets/create', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await resp.json();
+        
+        if (data.error) {
+          alert('Lỗi: ' + data.error);
+          return;
+        }
+        
+        if (data.set_id) {
+          alert('✅ Tạo bộ từ thành công!');
+          window.location.href = `/sets/${data.set_id}`;
+        }
+      } catch (err) {
+        alert('Lỗi kết nối: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

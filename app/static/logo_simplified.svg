@@ -1,0 +1,21 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradLogo" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d32f2f" />
+      <stop offset="50%" stop-color="#ff9800" />
+      <stop offset="100%" stop-color="#ffeb3b" />
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#gradLogo)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 70 A40 40 0 1 1 80 70" stroke-width="2" opacity="0.8"/>
+    <path d="M20 50 Q50 65 80 50" fill="none" stroke-width="4"/>
+    <path d="M20 50 L35 40 M80 50 L65 40" />
+    <path d="M50 60 L30 30 L45 30 Z" fill="url(#gradLogo)" stroke="none"/>
+    <path d="M50 60 L70 30 L55 30 Z" fill="url(#gradLogo)" stroke="none"/>
+    <circle cx="50" cy="35" r="5" stroke-width="2"/>
+    <line x1="50" y1="40" x2="50" y2="45" stroke-width="2"/>
+    <line x1="47" y1="45" x2="53" y2="45" stroke-width="2"/>
+    <path d="M65 30 Q80 10 80 30 Q65 40 65 30" fill="url(#gradLogo)" stroke="none"/>
+  </g>
+  <text x="50" y="85" font-family="Arial, sans-serif" font-size="14" fill="url(#gradLogo)" text-anchor="middle" font-weight="bold">VocabApp</text>
+</svg>

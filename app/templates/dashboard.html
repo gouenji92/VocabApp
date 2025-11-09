@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <title>Dashboard - VocabApp</title>
-  <link rel="stylesheet" href="/static/base.css" />
+  <link rel="stylesheet" href="{{ url_for('static', path='/base.css') }}" />
   <style>
+    :root { --header-offset: 84px; }
     * {
       margin: 0;
       padding: 0;
@@ -17,81 +18,7 @@
       min-height: 100vh;
     }
 
-    /* Header giống Feed */
-    .top-header {
-      background: white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding: 12px 20px;
-    }
-
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .logo {
-      font-size: 1.8em;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-decoration: none;
-    }
-
-    .nav-icons {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-
-    .nav-btn {
-      padding: 8px 16px;
-      background: none;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1.1em;
-      color: #333;
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-
-    .nav-btn:hover {
-      background: #f0f2f5;
-    }
-
-    .nav-btn svg.icon {
-      width: 22px;
-      height: 22px;
-      flex-shrink: 0;
-      vertical-align: middle;
-    }
-
-    .nav-btn.active {
-      color: #667eea;
-      font-weight: 600;
-    }
-
-    .user-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 700;
-      font-size: 1em;
-    }
+    /* Header styles centralized in /static/base.css */
 
     main {
       max-width: 1200px;
@@ -233,11 +160,39 @@
       font-size: 0.9em;
     }
 
+    /* Căn bố cục thẻ bộ từ gần đây: tiêu đề/miêu tả linh hoạt, nút luôn bám đáy */
+    .recent-sets-grid .set-item {
+      display: flex;
+      flex-direction: column;
+      min-height: 180px;
+    }
+
+    /* Giới hạn 2 dòng để chiều cao đồng đều nhưng vẫn tùy nội dung */
+    .recent-sets-grid .set-item p.muted {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-clamp: 2; /* standard */
+      overflow: hidden;
+      min-height: 2.6em; /* ~2 dòng 0.9em với line-height mặc định */
+    }
+
+    .recent-sets-grid .set-item h3 {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .actions { 
       display: flex; 
       gap: 8px; 
       flex-wrap: wrap; 
       margin-top: 12px; 
+    }
+
+    /* Đẩy khu vực nút xuống đáy thẻ để các thẻ thẳng hàng bất kể mô tả dài/ngắn */
+    .recent-sets-grid .set-item .actions {
+      margin-top: auto;
     }
 
     .btn-ghost {
@@ -288,9 +243,17 @@
       text-decoration: none;
     }
 
-    aside .card { 
+    /* Cố định toàn bộ cột aside dưới header, tránh bị header che và tránh hai thẻ dính chồng nhau */
+    aside { 
       position: sticky; 
-      top: 76px;
+      top: var(--header-offset);
+      align-self: start;
+      height: fit-content;
+      z-index: 50; /* dưới header (z=100), đủ cao để không bị nội dung bên dưới che */
+    }
+    /* Card trong aside trở về vị trí bình thường để xếp chồng tự nhiên */
+    aside .card { 
+      position: static; 
     }
 
     @media (max-width: 768px) {
@@ -317,54 +280,33 @@
   </style>
 </head>
 <body>
-  <!-- Header giống Feed -->
-  <div class="top-header">
-    <div class="header-content">
-      <a href="/" class="logo">VocabApp</a>
-      <div class="nav-icons">
-        <a href="/feed" class="nav-btn" title="Feed">
-          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 15L24 4L42 15V40C42 41.1046 41.1046 42 40 42H8C6.89543 42 6 41.1046 6 40V15Z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 42V24H31V42" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Feed
-        </a>
-        <a href="/sets" class="nav-btn" title="Bộ từ của tôi">
-          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 8H32V40H8V8Z" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M32 8H40V40H32" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Bộ từ
-        </a>
-        <a href="/dashboard" class="nav-btn active" title="Thống kê">
-          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 42V18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M18 42V6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M30 42V26" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M42 42V12" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
-          Thống kê
-        </a>
-        {% if user and user.avatar %}
-        <img src="{{ user.avatar }}" class="user-avatar" title="{{ user.display_name or username }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" />
-        {% else %}
-        <div class="user-avatar" title="{{ user.display_name if user else username }}">{{ username[0].upper() }}</div>
-        {% endif %}
-        <a href="/profile" class="nav-btn" title="Tài khoản">
-          <svg class="icon" width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="12" r="8" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M42 44C42 34.0589 33.9411 26 24 26C14.0589 26 6 34.0589 6 44" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Tài khoản
-        </a>
-        <a href="/logout" class="nav-btn" style="color:#ef4444;font-weight:600;" title="Đăng xuất">Đăng xuất</a>
-      </div>
-    </div>
+  {% set active_page = 'dashboard' %}
+  {% include 'header.html' %}
+
+  <div class="back-button-container">
+    <button onclick="history.back()" class="back-button">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 8L5 16L13 24" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 16H27C35 16 41 22 41 30C41 38 35 44 27 44H21" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Quay lại
+    </button>
   </div>
 
   <main>
     <div class="page-header">
-      <h1>📊 Dashboard</h1>
+  <h1><span class="iconify icon-chart icon-24 icon-gradient-accent" style="margin-right:8px;"></span>Thống kê</h1>
       <p>Tổng quan học tập hôm nay</p>
     </div>
     <div class="layout-grid">
       <section>
         <div class="quick-actions">
           <a href="/" class="card quick-action" aria-label="Tải lên bộ từ mới">
-            <div class="quick-action-icon">📤</div>
+            <div class="quick-action-icon"><span class="iconify icon-upload icon-40 icon-gradient-accent"></span></div>
             <div>
               <h3>Tải lên File</h3>
               <p class="muted">Thêm bộ từ mới</p>
             </div>
           </a>
           <a href="/sets" class="card quick-action" aria-label="Xem tất cả bộ từ">
-            <div class="quick-action-icon">📖</div>
+            <div class="quick-action-icon"><span class="iconify icon-book icon-40 icon-gradient-accent"></span></div>
             <div>
               <h3>Quản lý Bộ Từ</h3>
               <p class="muted">Xem & chỉnh sửa</p>
@@ -372,7 +314,7 @@
           </a>
           {% if recent_sets %}
           <a href="/study/{{ recent_sets[0].id }}?mode=select" class="card quick-action" aria-label="Học ngay">
-            <div class="quick-action-icon">🎯</div>
+            <div class="quick-action-icon"><span class="iconify icon-target icon-40 icon-gradient-accent"></span></div>
             <div>
               <h3>Học Nhanh</h3>
               <p class="muted">Tiếp tục bộ gần nhất</p>
@@ -380,7 +322,7 @@
           </a>
           {% else %}
           <a href="#" class="card quick-action" aria-label="Học ngay" style="pointer-events:none;opacity:.4;">
-            <div class="quick-action-icon">🎯</div>
+            <div class="quick-action-icon"><span class="iconify icon-target icon-40 icon-gradient-accent" style="opacity:.35;"></span></div>
             <div>
               <h3>Học Nhanh</h3>
               <p class="muted">Tiếp tục bộ gần nhất</p>
@@ -390,39 +332,39 @@
         </div>
         <div class="stats-grid" style="margin-bottom:2rem;">
           <div class="card stat-card" aria-label="Tổng số bộ từ">
-            <div class="stat-icon">📚</div>
+            <div class="stat-icon"><span class="iconify icon-collection icon-32 icon-gradient-accent"></span></div>
             <div class="stat-value">{{ stats.total_sets }}</div>
             <div class="stat-label">Bộ từ</div>
           </div>
           <div class="card stat-card" aria-label="Tổng số từ vựng">
-            <div class="stat-icon">📝</div>
+            <div class="stat-icon"><span class="iconify icon-note icon-32 icon-gradient-accent"></span></div>
             <div class="stat-value">{{ stats.total_words }}</div>
             <div class="stat-label">Từ vựng</div>
           </div>
           <div class="card stat-card" aria-label="Từ đã học">
-            <div class="stat-icon">🎯</div>
+            <div class="stat-icon"><span class="iconify icon-target icon-32 icon-gradient-accent"></span></div>
             <div class="stat-value">{{ stats.learned_words }}</div>
             <div class="stat-label">Đã học</div>
           </div>
           <div class="card stat-card" aria-label="Từ cần ôn hôm nay">
-            <div class="stat-icon">📅</div>
+            <div class="stat-icon"><span class="iconify icon-clock icon-32 icon-gradient-accent"></span></div>
             <div class="stat-value">{{ stats.due_today }}</div>
             <div class="stat-label">Cần ôn</div>
           </div>
           <div class="card stat-card" aria-label="Độ chính xác">
-            <div class="stat-icon">🎓</div>
+            <div class="stat-icon"><span class="iconify icon-school icon-32 icon-gradient-accent"></span></div>
             <div class="stat-value">{{ stats.accuracy }}%</div>
             <div class="stat-label">Chính xác</div>
           </div>
           <div class="card stat-card" aria-label="Chuỗi ngày học">
-            <div class="stat-icon">🔥</div>
+            <div class="stat-icon"><span class="iconify icon-fire icon-32 icon-gradient-accent"></span></div>
             <div class="stat-value">{{ stats.streak }}</div>
             <div class="stat-label">Streak</div>
           </div>
         </div>
         <section class="card" aria-labelledby="recent-heading">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-            <h2 id="recent-heading" style="margin:0;">📖 Bộ từ gần đây</h2>
+            <h2 id="recent-heading" style="margin:0;"><span class="iconify icon-book icon-22 icon-gradient-accent" style="margin-right:6px;"></span>Bộ từ gần đây</h2>
             <a href="/sets" class="btn-ghost" style="white-space:nowrap;">Xem tất cả →</a>
           </div>
           {% if recent_sets %}
@@ -433,15 +375,15 @@
               <p class="muted" style="margin:.25rem 0 .5rem;">{{ s.description or 'Không có mô tả' }}</p>
               <div class="muted" style="font-size:.75rem;letter-spacing:.5px;">{{ s.language_from }} → {{ s.language_to }}</div>
               <div class="actions">
-                <a href="/sets/{{ s.id }}" class="btn-ghost">📋 Chi tiết</a>
-                <a href="/study/{{ s.id }}?mode=select" class="btn" style="flex:1;min-width:120px;">🎯 Học</a>
+                <a href="/sets/{{ s.id }}" class="btn-ghost"><span class="iconify icon-collection icon-16 icon-gradient-accent" style="margin-right:4px;"></span>Chi tiết</a>
+                <a href="/study/{{ s.id }}?mode=select" class="btn" style="flex:1;min-width:120px;"><span class="iconify icon-target icon-16 icon-gradient-accent" style="margin-right:4px;"></span>Học</a>
               </div>
             </div>
             {% endfor %}
           </div>
           {% else %}
           <div class="empty-state" style="text-align:center;padding:1.25rem .75rem;">
-            <div style="font-size:2rem;">📚</div>
+            <div style="font-size:2rem;"><span class="iconify icon-collection icon-36 icon-gradient-accent"></span></div>
             <p style="margin:.5rem 0 0;">Chưa có bộ từ nào. <a href="/" style="font-weight:600;">Tải lên file</a> để bắt đầu!</p>
           </div>
           {% endif %}
@@ -449,25 +391,25 @@
       </section>
       <aside>
         <div class="card" aria-label="Gợi ý tiếp theo" style="margin-bottom:1rem;">
-          <h2 style="margin-top:0;">🚀 Tiến bộ</h2>
+          <h2 style="margin-top:0;"><span class="iconify icon-rocket icon-22 icon-gradient-accent" style="margin-right:6px;"></span>Tiến bộ</h2>
           <p class="muted" style="font-size:.9rem;">Tập trung ôn các từ đến hạn để duy trì streak và cải thiện độ chính xác.</p>
           <ul style="list-style:none;padding:0;margin:0;display:grid;gap:.5rem;font-size:.85rem;">
-            <li>🕒 Đến hạn hôm nay: <strong>{{ stats.due_today }}</strong></li>
-            <li>🎯 Đã học: <strong>{{ stats.learned_words }}</strong> / {{ stats.total_words }}</li>
-            <li>🔥 Streak: <strong>{{ stats.streak }}</strong> ngày</li>
-            <li>🎓 Chính xác: <strong>{{ stats.accuracy }}%</strong></li>
+            <li><span class="iconify icon-clock icon-14 icon-gradient-accent" style="margin-right:4px;"></span>Đến hạn hôm nay: <strong>{{ stats.due_today }}</strong></li>
+            <li><span class="iconify icon-target icon-14 icon-gradient-accent" style="margin-right:4px;"></span>Đã học: <strong>{{ stats.learned_words }}</strong> / {{ stats.total_words }}</li>
+            <li><span class="iconify icon-fire icon-14 icon-gradient-accent" style="margin-right:4px;"></span>Streak: <strong>{{ stats.streak }}</strong> ngày</li>
+            <li><span class="iconify icon-school icon-14 icon-gradient-accent" style="margin-right:4px;"></span>Chính xác: <strong>{{ stats.accuracy }}%</strong></li>
           </ul>
           <div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap;">
             {% if recent_sets %}
-            <a href="/study/{{ recent_sets[0].id }}?mode=select" class="btn">🎴 Ôn ngay</a>
+            <a href="/study/{{ recent_sets[0].id }}?mode=select" class="btn"><span class="iconify icon-cards icon-16 icon-gradient-accent" style="margin-right:6px;"></span>Ôn ngay</a>
             {% else %}
-            <a href="#" class="btn" style="pointer-events:none;opacity:.4;">🎴 Ôn ngay</a>
+            <a href="#" class="btn" style="pointer-events:none;opacity:.4;"><span class="iconify icon-cards icon-16 icon-gradient-accent" style="margin-right:6px;opacity:.5;"></span>Ôn ngay</a>
             {% endif %}
-            <a href="/" class="btn-ghost">📤 Thêm bộ mới</a>
+            <a href="/" class="btn-ghost"><span class="iconify icon-upload icon-16 icon-gradient-accent" style="margin-right:6px;"></span>Thêm bộ mới</a>
           </div>
         </div>
         <div class="card" aria-label="Mẹo" style="font-size:.85rem;">
-          <h2 style="margin-top:0;">💡 Mẹo</h2>
+          <h2 style="margin-top:0;"><span class="iconify icon-lightbulb icon-20 icon-gradient-accent" style="margin-right:6px;"></span>Mẹo</h2>
           <ul style="padding-left:1rem;margin:.25rem 0;">
             <li>Ôn từ đúng lịch để tối ưu hoá SM-2.</li>
             <li>Dùng chế độ Trắc nghiệm để kiểm tra nhanh.</li>
@@ -477,19 +419,14 @@
       </aside>
     </div>
   </main>
+
+  <!-- Enhanced Features -->
+  <script src="{{ url_for('static', path='/enhanced.js') }}"></script>
   <script>
-    (function(){
-      const stored = localStorage.getItem('theme');
-      if(stored){ document.documentElement.setAttribute('data-theme', stored); }
-      else { document.documentElement.setAttribute('data-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); }
-    })();
-    function toggleTheme(){
-      const cur = document.documentElement.getAttribute('data-theme');
-      const next = cur === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-    }
+    // Initialize enhanced features
+    const themeManager = new ThemeManager();
+    window.toast = new ToastNotification();
   </script>
 </body>
 </html>
-            </div>
+

@@ -1,0 +1,16 @@
+<svg width="24" height="24" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradChart" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffc107" />
+      <stop offset="100%" stop-color="#f44336" />
+    </linearGradient>
+  </defs>
+  <g stroke="url(#gradChart)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="4" y1="56" x2="60" y2="56" />
+    <rect x="10" y="36" width="10" height="20" />
+    <rect x="27" y="26" width="10" height="30" />
+    <rect x="44" y="14" width="10" height="42" />
+    <polyline points="10 28 27 16 44 6" />
+    <polyline points="36 6 44 6 44 14" />
+  </g>
+</svg>

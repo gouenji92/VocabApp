@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giới thiệu - {{ profile_user.display_name }} - VocabApp</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/base.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* Profile Container */
+        .profile-container {
+            max-width: 940px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Cover Photo - Compact version */
+        .cover-photo {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cover-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cover-photo-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3em;
+            font-weight: 700;
+        }
+
+        /* Profile Header - Compact */
+        .profile-header {
+            padding: 0 32px;
+            position: relative;
+        }
+
+        .profile-header-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #e4e6eb;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid white;
+            background: white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-avatar-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2em;
+            font-weight: 700;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #050505;
+            margin-bottom: 4px;
+        }
+
+        .profile-name:hover {
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 12px;
+            color: #65676b;
+            font-size: 0.9em;
+        }
+
+        .profile-stat {
+            cursor: pointer;
+        }
+
+        .profile-stat:hover {
+            text-decoration: underline;
+        }
+
+        .profile-stat strong {
+            color: #050505;
+            font-weight: 600;
+        }
+
+        /* Profile Navigation */
+        .profile-nav {
+            display: flex;
+            gap: 8px;
+            padding: 0 32px;
+        }
+
+        .profile-nav-item {
+            padding: 16px 16px;
+            color: #65676b;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .profile-nav-item:hover {
+            background: #f2f3f5;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .profile-nav-item.active {
+            color: #1877f2;
+            border-bottom-color: #1877f2;
+        }
+
+        /* About Container */
+        .about-container {
+            max-width: 940px;
+            margin: 16px auto;
+            padding: 0 16px;
+        }
+
+        /* Info Cards */
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .info-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .info-card-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #050505;
+        }
+
+        .btn-edit-section {
+            padding: 8px 16px;
+            background: #e4e6eb;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .btn-edit-section:hover {
+            background: #d0d2d7;
+        }
+
+        /* Info Items */
+        .info-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #e4e6eb;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.85em;
+            color: #65676b;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 1em;
+            color: #050505;
+            font-weight: 500;
+        }
+
+        .info-value a {
+            color: #1877f2;
+            text-decoration: none;
+        }
+
+        .info-value a:hover {
+            text-decoration: underline;
+        }
+
+        /* Bio Section */
+        .bio-text {
+            font-size: 1.05em;
+            line-height: 1.6;
+            color: #050505;
+            white-space: pre-wrap;
+        }
+
+        /* Statistics Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        /* Activity Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e4e6eb;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 24px;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -34px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+        }
+
+        .timeline-content {
+            background: #f7f8fa;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .timeline-description {
+            color: #65676b;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .timeline-date {
+            color: #65676b;
+            font-size: 0.8em;
+        }
+
+        /* Empty State */
+        .empty-info {
+            text-align: center;
+            padding: 40px 20px;
+            color: #65676b;
+        }
+
+        .empty-info-icon {
+            font-size: 3em;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                padding: 0 16px;
+            }
+
+            .profile-nav {
+                padding: 0 16px;
+            }
+
+            .cover-photo {
+                height: 150px;
+            }
+
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <!-- Profile Container -->
+    <div class="profile-container">
+        <!-- Cover Photo - Compact -->
+        <div class="cover-photo">
+            {% if profile_user.cover_image %}
+            <img src="{{ profile_user.cover_image }}" alt="Cover">
+            {% else %}
+            <div class="cover-photo-placeholder">
+                {{ profile_user.display_name[0].upper() }}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Profile Header - Compact -->
+        <div class="profile-header">
+            <div class="profile-header-content">
+                <div class="profile-avatar">
+                    {% if profile_user.avatar %}
+                    <img src="{{ profile_user.avatar }}" alt="{{ profile_user.display_name }}">
+                    {% else %}
+                    <div class="profile-avatar-placeholder">
+                        {{ profile_user.display_name[0].upper() }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="profile-info">
+                    <h1 class="profile-name" onclick="window.location.href='/user/{{ profile_user.username }}'">
+                        {{ profile_user.display_name }}
+                    </h1>
+                    <div class="profile-stats">
+                        <div class="profile-stat">
+                            <strong>{{ followers_count }}</strong> người theo dõi
+                        </div>
+                        <div class="profile-stat">
+                            <strong>{{ sets_count }}</strong> bộ từ
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Navigation -->
+        <div class="profile-nav">
+            <a href="/user/{{ profile_user.username }}" class="profile-nav-item">Bài viết</a>
+            <a href="/user/{{ profile_user.username }}/sets" class="profile-nav-item">Bộ từ</a>
+            <a href="/user/{{ profile_user.username }}/about" class="profile-nav-item active">Giới thiệu</a>
+        </div>
+    </div>
+
+    <!-- About Container -->
+    <div class="about-container">
+        <!-- Bio Section -->
+        {% if profile_user.bio or is_own_profile %}
+        <div class="info-card">
+            <div class="info-card-header">
+                <h2 class="info-card-title">✨ Tiểu sử</h2>
+                {% if is_own_profile %}
+                <button class="btn-edit-section" onclick="window.location.href='/user/{{ profile_user.username }}'">Chỉnh sửa</button>
+                {% endif %}
+            </div>
+            {% if profile_user.bio %}
+            <p class="bio-text">{{ profile_user.bio }}</p>
+            {% else %}
+            <div class="empty-info">
+                <div class="empty-info-icon">📝</div>
+                <p>Chưa có tiểu sử</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Personal Info -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <h2 class="info-card-title">📋 Thông tin cá nhân</h2>
+                {% if is_own_profile %}
+                <button class="btn-edit-section" onclick="window.location.href='/user/{{ profile_user.username }}'">Chỉnh sửa</button>
+                {% endif %}
+            </div>
+
+            {% if profile_user.email or profile_user.location or profile_user.website or profile_user.joined_date %}
+            <div>
+                {% if profile_user.email %}
+                <div class="info-item">
+                    <div class="info-icon">📧</div>
+                    <div class="info-content">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ profile_user.email }}</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if profile_user.location %}
+                <div class="info-item">
+                    <div class="info-icon">📍</div>
+                    <div class="info-content">
+                        <div class="info-label">Địa điểm</div>
+                        <div class="info-value">{{ profile_user.location }}</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if profile_user.website %}
+                <div class="info-item">
+                    <div class="info-icon">🔗</div>
+                    <div class="info-content">
+                        <div class="info-label">Website</div>
+                        <div class="info-value">
+                            <a href="{{ profile_user.website }}" target="_blank">{{ profile_user.website }}</a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="info-item">
+                    <div class="info-icon">📅</div>
+                    <div class="info-content">
+                        <div class="info-label">Tham gia</div>
+                        <div class="info-value">{{ profile_user.joined_date or 'Gần đây' }}</div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-info">
+                <div class="empty-info-icon">👤</div>
+                <p>Chưa cập nhật thông tin</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Statistics -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <h2 class="info-card-title">📊 Thống kê</h2>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number">{{ sets_count }}</div>
+                    <div class="stat-label">Bộ từ đã tạo</div>
+                </div>
+                <div class="stat-box" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                    <div class="stat-number">{{ followers_count }}</div>
+                    <div class="stat-label">Người theo dõi</div>
+                </div>
+                <div class="stat-box" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                    <div class="stat-number">{{ following_count }}</div>
+                    <div class="stat-label">Đang theo dõi</div>
+                </div>
+                <div class="stat-box" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                    <div class="stat-number">{{ total_terms }}</div>
+                    <div class="stat-label">Tổng số từ vựng</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <h2 class="info-card-title">🕒 Hoạt động gần đây</h2>
+            </div>
+
+            {% if recent_activities %}
+            <div class="timeline">
+                {% for activity in recent_activities %}
+                <div class="timeline-item">
+                    <div class="timeline-dot">{{ activity.icon }}</div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">{{ activity.title }}</div>
+                        <div class="timeline-description">{{ activity.description }}</div>
+                        <div class="timeline-date">{{ activity.date }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-info">
+                <div class="empty-info-icon">🌟</div>
+                <p>Chưa có hoạt động nào</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

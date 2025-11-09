@@ -8,7 +8,9 @@ except Exception:
 HEADER_HINTS = {
     'word': ['từ', 'từ vựng', 'term', 'word', 'english', 'vocabulary', 'từ tiếng anh', 'vocab'],
     'pos': ['loại từ', 'từ loại', 'pos', 'part of speech', 'word type', 'type'],
-    'meaning': ['nghĩa', 'định nghĩa', 'definition', 'meaning', 'translation', 'dịch', 'tiếng việt', 'vietnamese']
+    'meaning': ['nghĩa', 'định nghĩa', 'definition', 'meaning', 'translation', 'dịch', 'tiếng việt', 'vietnamese'],
+    'pronunciation': ['phiên âm', 'phát âm', 'pronunciation', 'phonetic', 'ipa', 'transcription'],
+    'example': ['ví dụ', 'ví du', 'example', 'sample', 'sentence', 'usage', 'câu ví dụ']
 }
 
 POS_VALUES = set([
@@ -81,7 +83,7 @@ def read_xlsx_bytes(b: bytes) -> List[Dict[str, str]]:
 
 
 def score_headers(headers: List[str]) -> Dict[str, Dict[str, float]]:
-    scores = {h: {'word': 0.0, 'pos': 0.0, 'meaning': 0.0} for h in headers}
+    scores = {h: {'word': 0.0, 'pos': 0.0, 'meaning': 0.0, 'pronunciation': 0.0, 'example': 0.0} for h in headers}
     for h in headers:
         hl = h.lower()
         for cat, hints in HEADER_HINTS.items():
@@ -92,10 +94,10 @@ def score_headers(headers: List[str]) -> Dict[str, Dict[str, float]]:
 
 
 def score_content(rows: List[Dict[str, str]], headers: List[str]) -> Dict[str, Dict[str, float]]:
-    scores = {h: {'word': 0.0, 'pos': 0.0, 'meaning': 0.0} for h in headers}
+    scores = {h: {'word': 0.0, 'pos': 0.0, 'meaning': 0.0, 'pronunciation': 0.0, 'example': 0.0} for h in headers}
     sample = rows[: min(50, len(rows))]
     for h in headers:
-        word_hits = pos_hits = meaning_hits = 0
+        word_hits = pos_hits = meaning_hits = pronunciation_hits = example_hits = 0
         total = 0
         for r in sample:
             s = (r.get(h) or '').strip()
@@ -105,6 +107,12 @@ def score_content(rows: List[Dict[str, str]], headers: List[str]) -> Dict[str, D
             # pos detection - very strict
             if is_pos_value(s):
                 pos_hits += 1
+            # pronunciation: contains IPA chars or starts with / or [ brackets
+            if any(c in s for c in ['ə', 'ɪ', 'ʊ', 'ɔ', 'ɑ', 'æ', 'ʌ', 'ɜ', 'θ', 'ð', 'ʃ', 'ʒ', 'ŋ']) or s.startswith(('/', '[')):
+                pronunciation_hits += 1
+            # example: longer sentences (>5 words) or contains sentence patterns
+            if len(s.split()) >= 5 or any(pattern in s.lower() for pattern in ['.', '!', '?', 'e.g', 'ex:', 'ví dụ']):
+                example_hits += 1
             # meaning: longer text OR Vietnamese OR starts with uppercase Vietnamese letter
             if _has_vietnamese_chars(s) or len(s.split()) >= 4 or len(s) > 30:
                 meaning_hits += 1
@@ -117,6 +125,8 @@ def score_content(rows: List[Dict[str, str]], headers: List[str]) -> Dict[str, D
                 scores[h]['pos'] += 10.0
             else:
                 scores[h]['pos'] += 3.0 * (pos_hits / total)
+            scores[h]['pronunciation'] += 2.5 * (pronunciation_hits / total)
+            scores[h]['example'] += 2.0 * (example_hits / total)
             scores[h]['meaning'] += 2.5 * (meaning_hits / total)
             scores[h]['word'] += 2.0 * (word_hits / total)
     return scores
@@ -134,12 +144,12 @@ def choose_mapping(rows: List[Dict[str, str]]) -> Tuple[dict, List[str]]:
     headers = list(rows[0].keys())
     hs = score_headers(headers)
     cs = score_content(rows, headers)
-    combined = {h: {k: hs[h][k] + cs[h][k] for k in ['word', 'pos', 'meaning']} for h in headers}
+    combined = {h: {k: hs[h][k] + cs[h][k] for k in ['word', 'pos', 'meaning', 'pronunciation', 'example']} for h in headers}
     assigned = {}
     used = set()
     
-    # Priority order: pos first (most distinctive), then word, then meaning
-    for cat in ['pos', 'word', 'meaning']:
+    # Priority order: pos first (most distinctive), then word, meaning, pronunciation, example
+    for cat in ['pos', 'word', 'meaning', 'pronunciation', 'example']:
         best_col = None
         best_score = 0.0
         for h in headers:
@@ -154,6 +164,10 @@ def choose_mapping(rows: List[Dict[str, str]]) -> Tuple[dict, List[str]]:
             thresh = 2.0  # POS needs strong signal
         elif cat == 'word':
             thresh = 0.8
+        elif cat == 'pronunciation':
+            thresh = 0.5  # Lower threshold for optional field
+        elif cat == 'example':
+            thresh = 0.5  # Lower threshold for optional field
         else:  # meaning
             thresh = 0.8
         if best_col and best_score >= thresh:

@@ -48,9 +48,9 @@ def create_set(name: str, description: str, lang_from: str, lang_to: str, user_i
 def list_terms(set_id: str) -> List[Dict[str, Any]]:
     return [t for t in _load(TERMS_FILE) if t.get('set_id') == set_id]
 
-def add_term(set_id: str, term: str, definition: str, pos: str = None, example: str = None):
+def add_term(set_id: str, term: str, definition: str, pos: str = None, pronunciation: str = None, example: str = None):
     terms = _load(TERMS_FILE)
-    row = {'id': str(uuid.uuid4()), 'set_id': set_id, 'term': term, 'definition': definition, 'pos': pos, 'example': example}
+    row = {'id': str(uuid.uuid4()), 'set_id': set_id, 'term': term, 'definition': definition, 'pos': pos, 'pronunciation': pronunciation, 'example': example}
     terms.append(row)
     _save(TERMS_FILE, terms)
     return row
@@ -142,6 +142,9 @@ LIKES_FILE = os.path.join(DATA_DIR, 'likes.json')
 COMMENTS_FILE = os.path.join(DATA_DIR, 'comments.json')
 SHARES_FILE = os.path.join(DATA_DIR, 'shares.json')
 POSTS_FILE = os.path.join(DATA_DIR, 'posts.json')
+BOOKMARKS_FILE = os.path.join(DATA_DIR, 'bookmarks.json')
+COMMENT_LIKES_FILE = os.path.join(DATA_DIR, 'comment_likes.json')
+COMMENT_REPLIES_FILE = os.path.join(DATA_DIR, 'comment_replies.json')
 
 def get_progress(term_id: str, user_id: str = 'default') -> Dict[str, Any]:
     progs = _load(PROGRESS_FILE)
@@ -405,7 +408,7 @@ def get_feed_posts(limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
 
 
 # ---- Posts (Bài viết text thuần) ----
-def create_post(user_id: str, username: str, content: str, attached_set_id: str = None) -> Dict[str, Any]:
+def create_post(user_id: str, username: str, content: str, attached_set_id: str = None, image_url: str = None) -> Dict[str, Any]:
     """Tạo bài viết mới lên feed"""
     from datetime import datetime
     posts = _load(POSTS_FILE)
@@ -416,6 +419,7 @@ def create_post(user_id: str, username: str, content: str, attached_set_id: str 
         'username': username,
         'content': content,
         'attached_set_id': attached_set_id,
+        'image_url': image_url,
         'created_at': datetime.utcnow().isoformat(),
         'post_type': 'text_post'
     }
@@ -426,6 +430,8 @@ def create_post(user_id: str, username: str, content: str, attached_set_id: str 
 
 def list_all_feed_items(limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
     """Lấy tất cả feed items (posts + public sets) và merge lại"""
+    from .auth import get_user
+    
     # Get text posts
     posts = _load(POSTS_FILE)
     for p in posts:
@@ -433,6 +439,12 @@ def list_all_feed_items(limit: int = 20, offset: int = 0) -> List[Dict[str, Any]
         p['likes_count'] = get_likes_count(p['id'])
         p['comments_count'] = get_comments_count(p['id'])
         p['shares_count'] = get_shares_count(p['id'])
+        
+        # Get user info (avatar, display_name)
+        user_info = get_user(p.get('username') or p.get('user_id'))
+        if user_info:
+            p['user_avatar'] = user_info.get('avatar')
+            p['user_display_name'] = user_info.get('display_name') or p.get('username')
         
         # If has attached set, get set info
         if p.get('attached_set_id'):
@@ -461,6 +473,12 @@ def list_all_feed_items(limit: int = 20, offset: int = 0) -> List[Dict[str, Any]
         # For consistency with text posts
         s['content'] = s.get('description', '')
         s['username'] = s.get('owner_username', 'Unknown')
+        
+        # Get user info (avatar, display_name)
+        user_info = get_user(s.get('owner_username') or s.get('user_id'))
+        if user_info:
+            s['user_avatar'] = user_info.get('avatar')
+            s['user_display_name'] = user_info.get('display_name') or s.get('username')
     
     # Merge and sort by created_at
     all_items = posts + public_sets
@@ -468,5 +486,242 @@ def list_all_feed_items(limit: int = 20, offset: int = 0) -> List[Dict[str, Any]
     
     # Pagination
     return all_items[offset:offset + limit]
+
+def get_user_posts(username: str, limit: int = 20, offset: int = 0) -> List[Dict[str, Any]]:
+    """Lấy bài viết của một user cụ thể (chỉ text posts, không bao gồm vocab sets)"""
+    posts = _load(POSTS_FILE)
+    user_posts = [p for p in posts if p.get('username') == username or p.get('user_id') == username]
+    
+    # Add stats and attached set info
+    for p in user_posts:
+        p['post_type'] = 'text_post'
+        p['likes_count'] = get_likes_count(p['id'])
+        p['comments_count'] = get_comments_count(p['id'])
+        p['shares_count'] = get_shares_count(p['id'])
+        
+        # If has attached set, get set info
+        if p.get('attached_set_id'):
+            attached_set = get_set(p['attached_set_id'])
+            if attached_set:
+                terms = list_terms(attached_set['id'])
+                p['attached_set'] = attached_set
+                p['attached_set']['term_count'] = len(terms)
+                p['attached_set']['preview_terms'] = terms[:3] if len(terms) > 3 else terms
+    
+    # Sort by created_at
+    user_posts.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    
+    # Pagination
+    return user_posts[offset:offset + limit]
+
+
+# ---- Bookmarks (Lưu bộ từ) ----
+def add_bookmark(set_id: str, user_id: str) -> bool:
+    """Lưu bộ từ vào danh sách bookmark"""
+    from datetime import datetime
+    bookmarks = _load(BOOKMARKS_FILE)
+    
+    # Check if already bookmarked
+    if any(b.get('set_id') == set_id and b.get('user_id') == user_id for b in bookmarks):
+        return False
+    
+    bookmarks.append({
+        'id': str(uuid.uuid4()),
+        'set_id': set_id,
+        'user_id': user_id,
+        'created_at': datetime.utcnow().isoformat()
+    })
+    _save(BOOKMARKS_FILE, bookmarks)
+    return True
+
+def remove_bookmark(set_id: str, user_id: str) -> bool:
+    """Xóa bookmark"""
+    bookmarks = _load(BOOKMARKS_FILE)
+    filtered = [b for b in bookmarks if not (b.get('set_id') == set_id and b.get('user_id') == user_id)]
+    if len(filtered) < len(bookmarks):
+        _save(BOOKMARKS_FILE, filtered)
+        return True
+    return False
+
+def is_bookmarked(set_id: str, user_id: str) -> bool:
+    """Kiểm tra xem user đã bookmark bộ từ chưa"""
+    bookmarks = _load(BOOKMARKS_FILE)
+    return any(b.get('set_id') == set_id and b.get('user_id') == user_id for b in bookmarks)
+
+def get_user_bookmarks(user_id: str) -> List[Dict[str, Any]]:
+    """Lấy danh sách bookmarks của user"""
+    bookmarks = _load(BOOKMARKS_FILE)
+    user_bookmarks = [b for b in bookmarks if b.get('user_id') == user_id]
+    
+    # Get full set info for each bookmark
+    result = []
+    for bm in user_bookmarks:
+        set_data = get_set(bm['set_id'])
+        if set_data:
+            set_data['bookmarked_at'] = bm.get('created_at')
+            result.append(set_data)
+    
+    return result
+
+
+# ---- Comment Likes ----
+def add_comment_like(comment_id: str, user_id: str) -> bool:
+    """Thích một bình luận"""
+    from datetime import datetime
+    likes = _load(COMMENT_LIKES_FILE)
+    
+    # Check if already liked
+    if any(l.get('comment_id') == comment_id and l.get('user_id') == user_id for l in likes):
+        return False
+    
+    likes.append({
+        'id': str(uuid.uuid4()),
+        'comment_id': comment_id,
+        'user_id': user_id,
+        'created_at': datetime.utcnow().isoformat()
+    })
+    _save(COMMENT_LIKES_FILE, likes)
+    return True
+
+def remove_comment_like(comment_id: str, user_id: str) -> bool:
+    """Bỏ thích bình luận"""
+    likes = _load(COMMENT_LIKES_FILE)
+    filtered = [l for l in likes if not (l.get('comment_id') == comment_id and l.get('user_id') == user_id)]
+    if len(filtered) < len(likes):
+        _save(COMMENT_LIKES_FILE, filtered)
+        return True
+    return False
+
+def get_comment_likes_count(comment_id: str) -> int:
+    """Đếm số lượt thích của bình luận"""
+    likes = _load(COMMENT_LIKES_FILE)
+    return len([l for l in likes if l.get('comment_id') == comment_id])
+
+def is_comment_liked(comment_id: str, user_id: str) -> bool:
+    """Kiểm tra user đã thích comment chưa"""
+    likes = _load(COMMENT_LIKES_FILE)
+    return any(l.get('comment_id') == comment_id and l.get('user_id') == user_id for l in likes)
+
+
+# ---- Comment Replies ----
+def add_comment_reply(comment_id: str, user_id: str, username: str, content: str) -> Dict[str, Any]:
+    """Trả lời một bình luận"""
+    from datetime import datetime
+    replies = _load(COMMENT_REPLIES_FILE)
+    reply = {
+        'id': str(uuid.uuid4()),
+        'comment_id': comment_id,
+        'user_id': user_id,
+        'username': username,
+        'content': content,
+        'created_at': datetime.utcnow().isoformat()
+    }
+    replies.append(reply)
+    _save(COMMENT_REPLIES_FILE, replies)
+    return reply
+
+def get_comment_replies(comment_id: str) -> List[Dict[str, Any]]:
+    """Lấy danh sách trả lời của một comment"""
+    replies = _load(COMMENT_REPLIES_FILE)
+    comment_replies = [r for r in replies if r.get('comment_id') == comment_id]
+    comment_replies.sort(key=lambda x: x.get('created_at', ''))
+    return comment_replies
+
+def get_comment_replies_count(comment_id: str) -> int:
+    """Đếm số lượng reply của comment"""
+    replies = _load(COMMENT_REPLIES_FILE)
+    return len([r for r in replies if r.get('comment_id') == comment_id])
+
+
+# ---- Post Management: Delete & Edit ----
+def delete_post(post_id: str, user_id: str) -> bool:
+    """Xóa bài viết (chỉ người tạo mới được xóa)"""
+    posts = _load(POSTS_FILE)
+    for i, post in enumerate(posts):
+        if post.get('id') == post_id and post.get('user_id') == user_id:
+            posts.pop(i)
+            _save(POSTS_FILE, posts)
+            return True
+    return False
+
+def update_post(post_id: str, user_id: str, content: str, image_url: str = None) -> bool:
+    """Chỉnh sửa nội dung bài viết (chỉ người tạo)"""
+    from datetime import datetime
+    posts = _load(POSTS_FILE)
+    for post in posts:
+        if post.get('id') == post_id and post.get('user_id') == user_id:
+            post['content'] = content
+            if image_url is not None:
+                post['image_url'] = image_url
+            post['edited_at'] = datetime.utcnow().isoformat()
+            _save(POSTS_FILE, posts)
+            return True
+    return False
+
+def get_post(post_id: str) -> Dict[str, Any]:
+    """Lấy thông tin một bài viết"""
+    posts = _load(POSTS_FILE)
+    for post in posts:
+        if post.get('id') == post_id:
+            return post
+    return None
+
+
+# ---- Comment Management: Delete & Edit ----
+def delete_comment(comment_id: str, user_id: str) -> bool:
+    """Xóa comment (chỉ người tạo mới được xóa)"""
+    comments = _load(COMMENTS_FILE)
+    for i, comment in enumerate(comments):
+        if comment.get('id') == comment_id and comment.get('user_id') == user_id:
+            comments.pop(i)
+            _save(COMMENTS_FILE, comments)
+            # Xóa luôn các replies của comment này
+            delete_comment_replies(comment_id)
+            return True
+    return False
+
+def update_comment(comment_id: str, user_id: str, content: str) -> bool:
+    """Chỉnh sửa nội dung comment (chỉ người tạo)"""
+    from datetime import datetime
+    comments = _load(COMMENTS_FILE)
+    for comment in comments:
+        if comment.get('id') == comment_id and comment.get('user_id') == user_id:
+            comment['content'] = content
+            comment['edited_at'] = datetime.utcnow().isoformat()
+            _save(COMMENTS_FILE, comments)
+            return True
+    return False
+
+def delete_comment_replies(comment_id: str) -> bool:
+    """Xóa tất cả replies của một comment"""
+    replies = _load(COMMENT_REPLIES_FILE)
+    original_count = len(replies)
+    replies = [r for r in replies if r.get('comment_id') != comment_id]
+    _save(COMMENT_REPLIES_FILE, replies)
+    return len(replies) < original_count
+
+
+# ---- Reply Management: Delete & Edit ----
+def delete_reply(reply_id: str, user_id: str) -> bool:
+    """Xóa reply (chỉ người tạo mới được xóa)"""
+    replies = _load(COMMENT_REPLIES_FILE)
+    for i, reply in enumerate(replies):
+        if reply.get('id') == reply_id and reply.get('user_id') == user_id:
+            replies.pop(i)
+            _save(COMMENT_REPLIES_FILE, replies)
+            return True
+    return False
+
+def update_reply(reply_id: str, user_id: str, content: str) -> bool:
+    """Chỉnh sửa nội dung reply (chỉ người tạo)"""
+    from datetime import datetime
+    replies = _load(COMMENT_REPLIES_FILE)
+    for reply in replies:
+        if reply.get('id') == reply_id and reply.get('user_id') == user_id:
+            reply['content'] = content
+            reply['edited_at'] = datetime.utcnow().isoformat()
+            _save(COMMENT_REPLIES_FILE, replies)
+            return True
+    return False
 
 

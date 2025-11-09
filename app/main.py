@@ -21,10 +21,17 @@ from .storage import (
     update_term, get_term, get_user_stats, list_public_sets, clone_set,
     add_like, remove_like, get_likes_count, is_liked_by_user,
     add_comment, get_comments, get_comments_count, add_share, get_shares_count,
-    get_feed_posts, create_post, list_all_feed_items
+    get_feed_posts, create_post, list_all_feed_items, get_user_posts,
+    add_bookmark, remove_bookmark, is_bookmarked, get_user_bookmarks,
+    add_comment_like, remove_comment_like, get_comment_likes_count, is_comment_liked,
+    add_comment_reply, get_comment_replies, get_comment_replies_count,
+    delete_post, update_post, get_post,
+    delete_comment, update_comment,
+    delete_reply, update_reply
 )
 from .auth import create_user, verify_user, get_user
 from .auth import update_user_profile, change_user_password
+from .auth import follow_user, unfollow_user, is_following, get_followers, get_following
 from . import ai_helper
 from .oauth import oauth
 
@@ -45,6 +52,10 @@ else:
 # Ensure avatars directory exists inside static
 avatars_dir = os.path.join(static_dir, 'avatars')
 os.makedirs(avatars_dir, exist_ok=True)
+
+# Ensure uploads directory exists for post images
+uploads_dir = os.path.join(static_dir, 'uploads')
+os.makedirs(uploads_dir, exist_ok=True)
 
 # Session management
 SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
@@ -92,7 +103,7 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
         return templates.TemplateResponse('login.html', { 'request': request, 'error': 'Tên đăng nhập hoặc mật khẩu không đúng' })
     
     token = create_session_token(username)
-    response = RedirectResponse(url='/', status_code=303)
+    response = RedirectResponse(url='/feed', status_code=303)
     response.set_cookie(key='session', value=token, httponly=True, max_age=7*24*60*60)
     return response
 
@@ -114,7 +125,7 @@ def register(request: Request, username: str = Form(...), password: str = Form(.
     
     # Auto login after register
     token = create_session_token(username)
-    response = RedirectResponse(url='/', status_code=303)
+    response = RedirectResponse(url='/feed', status_code=303)
     response.set_cookie(key='session', value=token, httponly=True, max_age=7*24*60*60)
     return response
 
@@ -156,8 +167,7 @@ def home(request: Request, session: Optional[str] = Cookie(None)):
     username = get_current_user(session)
     if not username:
         return RedirectResponse(url='/login', status_code=303)
-    user_obj = get_user(username)
-    return templates.TemplateResponse('upload.html', { 'request': request, 'username': username, 'user': user_obj })
+    return RedirectResponse(url='/feed', status_code=303)
 
 
 @app.post('/preview')
@@ -185,6 +195,8 @@ async def import_data(
     language_to: str = Form('vi'),
     word_col: Optional[str] = Form(None),
     pos_col: Optional[str] = Form(None),
+    pronunciation_col: Optional[str] = Form(None),
+    example_col: Optional[str] = Form(None),
     meaning_col: Optional[str] = Form(None),
     visibility: str = Form('private'),
 ):
@@ -196,6 +208,8 @@ async def import_data(
     word = word_col or auto_map.get('word')
     meaning = meaning_col or auto_map.get('meaning')
     pos = pos_col or auto_map.get('pos')
+    pronunciation = pronunciation_col or auto_map.get('pronunciation')
+    example = example_col or auto_map.get('example')
     if not word or not meaning:
         return { 'error': 'Không xác định được cột từ/ nghĩa' }
 
@@ -211,13 +225,76 @@ async def import_data(
         term_val = (r.get(word) or '').strip()
         meaning_val = (r.get(meaning) or '').strip()
         pos_val = (r.get(pos) or '').strip() if pos else None
+        pronunciation_val = (r.get(pronunciation) or '').strip() if pronunciation else None
+        example_val = (r.get(example) or '').strip() if example else None
         if not term_val or not meaning_val:
             skipped += 1
             continue
-        add_term(sid, term_val, meaning_val, pos_val)
+        add_term(sid, term_val, meaning_val, pos_val, pronunciation_val, example_val)
         inserted += 1
 
     return { 'set_id': sid, 'inserted': inserted, 'skipped': skipped }
+
+
+@app.get('/sets/create', response_class=HTMLResponse)
+def create_set_page(request: Request, session: Optional[str] = Cookie(None)):
+    """Render page to create new vocabulary set manually"""
+    username = get_current_user(session)
+    if not username:
+        return RedirectResponse(url='/login', status_code=303)
+    user_obj = get_user(username)
+    return templates.TemplateResponse('create_set.html', { 'request': request, 'username': username, 'user': user_obj })
+
+
+@app.post('/sets/create')
+async def create_set_submit(request: Request, session: Optional[str] = Cookie(None)):
+    """Handle form submission to create new set with terms"""
+    username = get_current_user(session)
+    if not username:
+        return { 'error': 'Vui lòng đăng nhập' }
+    
+    form_data = await request.form()
+    set_name = form_data.get('set_name', '').strip()
+    description = form_data.get('description', '').strip()
+    language_from = form_data.get('language_from', 'en').strip()
+    language_to = form_data.get('language_to', 'vi').strip()
+    visibility = form_data.get('visibility', 'private')
+    
+    if not set_name:
+        return { 'error': 'Tên bộ từ không được để trống' }
+    
+    # Create the set
+    new_set = create_set(set_name, description, language_from, language_to, username, visibility, username)
+    set_id = new_set['id']
+    
+    # Extract terms from form data
+    # Form sends: terms[1][term], terms[1][definition], terms[1][pos], etc.
+    terms_dict = {}
+    for key, value in form_data.items():
+        if key.startswith('terms['):
+            # Parse: terms[1][term] -> (1, 'term')
+            parts = key.replace('terms[', '').replace(']', '|').split('|')
+            if len(parts) >= 2:
+                term_id = parts[0]
+                field_name = parts[1]
+                if term_id not in terms_dict:
+                    terms_dict[term_id] = {}
+                terms_dict[term_id][field_name] = value.strip() if isinstance(value, str) else ''
+    
+    # Add terms to the set
+    inserted = 0
+    for term_id, term_data in terms_dict.items():
+        term_val = term_data.get('term', '').strip()
+        definition_val = term_data.get('definition', '').strip()
+        pos_val = term_data.get('pos', '').strip() or None
+        pronunciation_val = term_data.get('pronunciation', '').strip() or None
+        example_val = term_data.get('example', '').strip() or None
+        
+        if term_val and definition_val:
+            add_term(set_id, term_val, definition_val, pos_val, pronunciation_val, example_val)
+            inserted += 1
+    
+    return { 'set_id': set_id, 'inserted': inserted, 'message': 'Tạo bộ từ thành công!' }
 
 
 @app.get('/sets', response_class=HTMLResponse)
@@ -766,20 +843,6 @@ def api_get_set_terms(set_id: str, session: Optional[str] = Cookie(None)):
     return JSONResponse(terms)
 
 
-@app.post('/api/sets/{set_id}/clone')
-def api_clone_set(set_id: str, session: Optional[str] = Cookie(None)):
-    """Clone a public set to user's collection"""
-    username = get_current_user(session)
-    if not username:
-        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
-    
-    new_set = clone_set(set_id, username, username)
-    if not new_set:
-        return JSONResponse({'error': 'Set not found or not public'}, status_code=404)
-    
-    return JSONResponse({'success': True, 'set_id': new_set['id'], 'name': new_set['name']})
-
-
 @app.post('/sets/{set_id}/publish')
 def publish_set(set_id: str, session: Optional[str] = Cookie(None)):
     """Make a set public or private"""
@@ -810,9 +873,10 @@ def feed_page(request: Request, session: Optional[str] = Cookie(None)):
     
     posts = list_all_feed_items(limit=10, offset=0)
     
-    # Add is_liked flag for current user
+    # Add is_liked and is_bookmarked flags for current user
     for post in posts:
         post['is_liked'] = is_liked_by_user(post['id'], username)
+        post['is_bookmarked'] = is_bookmarked(post['id'], username)
     
     # Get user's sets for create post dropdown
     user_sets = list_sets(user_id=username)
@@ -848,6 +912,22 @@ def feed_page(request: Request, session: Optional[str] = Cookie(None)):
         'user': user_obj,
         'format_time': format_time,
         'user_sets': user_sets
+    })
+
+
+@app.get('/settings', response_class=HTMLResponse)
+def settings_page(request: Request, session: Optional[str] = Cookie(None)):
+    """Trang cài đặt tài khoản"""
+    username = get_current_user(session)
+    if not username:
+        return RedirectResponse(url='/login', status_code=303)
+    
+    user_obj = get_user(username)
+    
+    return templates.TemplateResponse('settings.html', {
+        'request': request,
+        'username': username,
+        'user': user_obj
     })
 
 
@@ -964,6 +1044,37 @@ def api_get_feed(page: int = 1, limit: int = 10, session: Optional[str] = Cookie
     return JSONResponse({'posts': posts, 'page': page, 'has_more': len(posts) == limit})
 
 
+@app.post('/api/upload/image')
+async def upload_image(file: UploadFile = File(...), session: Optional[str] = Cookie(None)):
+    """Upload ảnh cho post"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    # Validate file type
+    if not file.content_type or not file.content_type.startswith('image/'):
+        return JSONResponse({'error': 'File phải là ảnh'}, status_code=400)
+    
+    # Validate file size (5MB)
+    content = await file.read()
+    if len(content) > 5 * 1024 * 1024:
+        return JSONResponse({'error': 'Ảnh không được vượt quá 5MB'}, status_code=400)
+    
+    # Save file with unique name
+    import hashlib
+    file_ext = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+    file_hash = hashlib.md5(content).hexdigest()[:16]
+    filename = f"{username}_{file_hash}.{file_ext}"
+    filepath = os.path.join(uploads_dir, filename)
+    
+    with open(filepath, 'wb') as f:
+        f.write(content)
+    
+    # Return URL
+    image_url = f"/static/uploads/{filename}"
+    return JSONResponse({'success': True, 'url': image_url})
+
+
 @app.post('/api/posts/create')
 async def api_create_post(request: Request, session: Optional[str] = Cookie(None)):
     """Tạo bài viết mới lên feed"""
@@ -974,9 +1085,10 @@ async def api_create_post(request: Request, session: Optional[str] = Cookie(None
     data = await request.json()
     content = data.get('content', '').strip()
     attached_set_id = data.get('attached_set_id')
+    image_url = data.get('image_url')
     
-    if not content:
-        return JSONResponse({'error': 'Nội dung không được để trống'}, status_code=400)
+    if not content and not image_url:
+        return JSONResponse({'error': 'Nội dung hoặc ảnh không được để trống'}, status_code=400)
     
     # Validate attached set if provided
     if attached_set_id:
@@ -984,7 +1096,7 @@ async def api_create_post(request: Request, session: Optional[str] = Cookie(None
         if not vset or vset.get('user_id') != username:
             return JSONResponse({'error': 'Bộ từ không hợp lệ'}, status_code=400)
     
-    post = create_post(username, username, content, attached_set_id)
+    post = create_post(username, username, content, attached_set_id, image_url)
     
     return JSONResponse({
         'success': True,
@@ -994,13 +1106,17 @@ async def api_create_post(request: Request, session: Optional[str] = Cookie(None
 
 @app.post('/api/sets/{set_id}/like')
 async def api_like_set(set_id: str, request: Request, session: Optional[str] = Cookie(None)):
-    """Thích/Bỏ thích bộ từ"""
+    """Thích/Bỏ thích bộ từ hoặc post"""
     username = get_current_user(session)
     if not username:
         return JSONResponse({'error': 'Not authenticated'}, status_code=401)
     
+    # Check if it's a set or post
     vset = get_set(set_id)
-    if not vset or vset.get('visibility') != 'public':
+    if not vset:
+        # Maybe it's a post, allow liking
+        pass
+    elif vset.get('visibility') != 'public':
         return JSONResponse({'error': 'Set not found or not public'}, status_code=404)
     
     data = await request.json()
@@ -1015,10 +1131,6 @@ async def api_like_set(set_id: str, request: Request, session: Optional[str] = C
     
     likes_count = get_likes_count(set_id)
     
-    # Track share if user is copying
-    if not unlike:
-        add_share(set_id, username)
-    
     return JSONResponse({
         'success': True,
         'liked': liked,
@@ -1028,47 +1140,324 @@ async def api_like_set(set_id: str, request: Request, session: Optional[str] = C
 
 @app.post('/api/sets/{set_id}/comment')
 async def api_comment_set(set_id: str, request: Request, session: Optional[str] = Cookie(None)):
-    """Bình luận vào bộ từ"""
+    """Bình luận vào bộ từ (public) hoặc bài viết text.
+
+    Trước đây endpoint này CHỈ cho phép comment vào bộ từ public, khiến không thể comment
+    lên bài viết text_post trên feed. Đồng thời người dùng hiểu nhầm là bị giới hạn chỉ 1
+    bình luận hoặc 1 trả lời. Thực tế backend không giới hạn, mà do endpoint từ chối bài viết.
+
+    Cập nhật: Cho phép nếu:
+      - set_id thuộc về 1 bộ từ public (giữ điều kiện cũ) HOẶC
+      - set_id trùng id của một text post (get_post trả về dữ liệu)
+    Nếu cả hai đều không tồn tại => 404.
+    """
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+
+    vset = get_set(set_id)
+    post_obj = None
+    if not vset:
+        # Thử coi đây là bài viết text
+        post_obj = get_post(set_id)
+
+    # Nếu là set thì phải public; nếu là post thì cho phép luôn
+    if vset:
+        if vset.get('visibility') != 'public':
+            return JSONResponse({'error': 'Set not found or not public'}, status_code=404)
+    elif not post_obj:
+        return JSONResponse({'error': 'Target not found'}, status_code=404)
+
+    data = await request.json()
+    content = data.get('content', '').strip()
+    if not content:
+        return JSONResponse({'error': 'Comment cannot be empty'}, status_code=400)
+
+    # Lưu comment dùng chung trường set_id (giữ schema cũ) – có thể là id của set hoặc post
+    comment = add_comment(set_id, username, username, content)
+    comments_count = get_comments_count(set_id)
+
+    return JSONResponse({'success': True, 'comment': comment, 'comments_count': comments_count})
+
+
+@app.get('/api/sets/{set_id}/comments')
+async def api_get_comments(set_id: str, session: Optional[str] = Cookie(None)):
+    """Lấy danh sách bình luận cho set public hoặc bài viết text.
+
+    Không giới hạn số lượng (front-end có thể scroll). Có thể mở rộng sau bằng query params
+    để phân trang nếu cần (page, limit).
+    """
+    username = get_current_user(session)
+
+    # Cho phép nếu tồn tại set public HOẶC là post
+    vset = get_set(set_id)
+    if vset and vset.get('visibility') != 'public':
+        return JSONResponse({'error': 'Set not public'}, status_code=403)
+    if not vset:
+        post_obj = get_post(set_id)
+        if not post_obj:
+            return JSONResponse({'error': 'Target not found'}, status_code=404)
+
+    comments = get_comments(set_id)
+
+    from .auth import get_user as _get_user
+    for comment in comments:
+        user_info = _get_user(comment.get('username'))
+        if user_info:
+            comment['user_avatar'] = user_info.get('avatar')
+            comment['user_display_name'] = user_info.get('display_name') or comment.get('username')
+        comment['likes_count'] = get_comment_likes_count(comment['id'])
+        comment['is_liked'] = is_comment_liked(comment['id'], username) if username else False
+        comment['replies_count'] = get_comment_replies_count(comment['id'])
+        comment['replies'] = get_comment_replies(comment['id'])
+        for reply in comment['replies']:
+            reply_user = _get_user(reply.get('username'))
+            if reply_user:
+                reply['user_avatar'] = reply_user.get('avatar')
+                reply['user_display_name'] = reply_user.get('display_name') or reply.get('username')
+
+    return JSONResponse(comments)
+
+
+@app.post('/api/sets/{set_id}/clone')
+async def api_clone_set(set_id: str, request: Request, session: Optional[str] = Cookie(None)):
+    """Sao chép bộ từ vào tài khoản của mình"""
     username = get_current_user(session)
     if not username:
         return JSONResponse({'error': 'Not authenticated'}, status_code=401)
     
+    # Get caption if provided
+    try:
+        data = await request.json()
+        caption = data.get('caption')
+    except:
+        caption = None
+    
     vset = get_set(set_id)
-    if not vset or vset.get('visibility') != 'public':
-        return JSONResponse({'error': 'Set not found or not public'}, status_code=404)
+    if not vset:
+        return JSONResponse({'error': 'Set not found'}, status_code=404)
+    
+    try:
+        new_set_id = clone_set(set_id, username, username)
+        add_share(set_id, username)  # Track as a share
+        
+        # If caption provided, could create a post about the shared set
+        # (Future enhancement: create a post with the caption)
+        
+        return JSONResponse({
+            'success': True,
+            'new_set_id': new_set_id
+        })
+    except Exception as e:
+        return JSONResponse({'error': str(e)}, status_code=500)
+
+
+# ---- Bookmark APIs ----
+@app.post('/api/sets/{set_id}/bookmark')
+async def api_bookmark_set(set_id: str, session: Optional[str] = Cookie(None)):
+    """Lưu/bỏ lưu bộ từ hoặc post"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    # Check if it's a set or post - allow bookmarking either
+    vset = get_set(set_id)
+    if not vset:
+        # Maybe it's a post, allow bookmarking
+        pass
+    
+    is_saved = is_bookmarked(set_id, username)
+    
+    if is_saved:
+        remove_bookmark(set_id, username)
+        saved = False
+    else:
+        add_bookmark(set_id, username)
+        saved = True
+    
+    return JSONResponse({
+        'success': True,
+        'saved': saved
+    })
+
+
+@app.get('/api/bookmarks')
+async def api_get_bookmarks(session: Optional[str] = Cookie(None)):
+    """Lấy danh sách bộ từ đã lưu"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    bookmarks = get_user_bookmarks(username)
+    return JSONResponse(bookmarks)
+
+
+# ---- Comment Like/Reply APIs ----
+@app.post('/api/comments/{comment_id}/like')
+async def api_like_comment(comment_id: str, session: Optional[str] = Cookie(None)):
+    """Thích/bỏ thích bình luận"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    is_liked = is_comment_liked(comment_id, username)
+    
+    if is_liked:
+        remove_comment_like(comment_id, username)
+        liked = False
+    else:
+        add_comment_like(comment_id, username)
+        liked = True
+    
+    likes_count = get_comment_likes_count(comment_id)
+    
+    return JSONResponse({
+        'success': True,
+        'liked': liked,
+        'likes_count': likes_count
+    })
+
+
+@app.post('/api/comments/{comment_id}/reply')
+async def api_reply_comment(comment_id: str, request: Request, session: Optional[str] = Cookie(None)):
+    """Trả lời bình luận"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
     
     data = await request.json()
     content = data.get('content', '').strip()
     
     if not content:
-        return JSONResponse({'error': 'Comment cannot be empty'}, status_code=400)
+        return JSONResponse({'error': 'Reply cannot be empty'}, status_code=400)
     
-    comment = add_comment(set_id, username, username, content)
-    comments_count = get_comments_count(set_id)
+    reply = add_comment_reply(comment_id, username, username, content)
+    replies_count = get_comment_replies_count(comment_id)
+    
+    # Add user info
+    from .auth import get_user
+    user_info = get_user(username)
+    if user_info:
+        reply['user_avatar'] = user_info.get('avatar')
+        reply['user_display_name'] = user_info.get('display_name') or username
     
     return JSONResponse({
         'success': True,
-        'comment': comment,
-        'comments_count': comments_count
+        'reply': reply,
+        'replies_count': replies_count
     })
 
 
-@app.get('/api/sets/{set_id}/comments')
-def api_get_comments(set_id: str, session: Optional[str] = Cookie(None)):
-    """Lấy danh sách bình luận"""
+# ========== Post Management APIs ==========
+
+@app.delete('/api/posts/{post_id}')
+async def api_delete_post(post_id: str, session: Optional[str] = Cookie(None)):
+    """Xóa bài viết"""
     username = get_current_user(session)
     if not username:
         return JSONResponse({'error': 'Not authenticated'}, status_code=401)
     
-    vset = get_set(set_id)
-    if not vset or vset.get('visibility') != 'public':
-        return JSONResponse({'error': 'Set not found or not public'}, status_code=404)
+    success = delete_post(post_id, username)
+    if success:
+        return JSONResponse({'success': True, 'message': 'Đã xóa bài viết'})
+    else:
+        return JSONResponse({'error': 'Cannot delete post'}, status_code=403)
+
+
+@app.put('/api/posts/{post_id}')
+async def api_update_post(post_id: str, request: Request, session: Optional[str] = Cookie(None)):
+    """Chỉnh sửa bài viết"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
     
-    comments = get_comments(set_id)
-    return JSONResponse(comments)
+    data = await request.json()
+    content = data.get('content', '').strip()
+    image_url = data.get('image_url')
+    
+    if not content:
+        return JSONResponse({'error': 'Content cannot be empty'}, status_code=400)
+    
+    success = update_post(post_id, username, content, image_url)
+    if success:
+        post = get_post(post_id)
+        return JSONResponse({'success': True, 'message': 'Đã cập nhật bài viết', 'post': post})
+    else:
+        return JSONResponse({'error': 'Cannot update post'}, status_code=403)
 
 
-# ========== OAuth Routes ==========
+# ========== Comment Management APIs ==========
+
+@app.delete('/api/comments/{comment_id}')
+async def api_delete_comment(comment_id: str, session: Optional[str] = Cookie(None)):
+    """Xóa bình luận"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    success = delete_comment(comment_id, username)
+    if success:
+        return JSONResponse({'success': True, 'message': 'Đã xóa bình luận'})
+    else:
+        return JSONResponse({'error': 'Cannot delete comment'}, status_code=403)
+
+
+@app.put('/api/comments/{comment_id}')
+async def api_update_comment(comment_id: str, request: Request, session: Optional[str] = Cookie(None)):
+    """Chỉnh sửa bình luận"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    data = await request.json()
+    content = data.get('content', '').strip()
+    
+    if not content:
+        return JSONResponse({'error': 'Content cannot be empty'}, status_code=400)
+    
+    success = update_comment(comment_id, username, content)
+    if success:
+        return JSONResponse({'success': True, 'message': 'Đã cập nhật bình luận'})
+    else:
+        return JSONResponse({'error': 'Cannot update comment'}, status_code=403)
+
+
+# ========== Reply Management APIs ==========
+
+@app.delete('/api/replies/{reply_id}')
+async def api_delete_reply(reply_id: str, session: Optional[str] = Cookie(None)):
+    """Xóa trả lời"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    success = delete_reply(reply_id, username)
+    if success:
+        return JSONResponse({'success': True, 'message': 'Đã xóa trả lời'})
+    else:
+        return JSONResponse({'error': 'Cannot delete reply'}, status_code=403)
+
+
+@app.put('/api/replies/{reply_id}')
+async def api_update_reply(reply_id: str, request: Request, session: Optional[str] = Cookie(None)):
+    """Chỉnh sửa trả lời"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    data = await request.json()
+    content = data.get('content', '').strip()
+    
+    if not content:
+        return JSONResponse({'error': 'Content cannot be empty'}, status_code=400)
+    
+    success = update_reply(reply_id, username, content)
+    if success:
+        return JSONResponse({'success': True, 'message': 'Đã cập nhật trả lời'})
+    else:
+        return JSONResponse({'error': 'Cannot update reply'}, status_code=403)
+
+
 
 @app.get('/test-oauth')
 async def test_oauth():
@@ -1295,5 +1684,273 @@ async def auth_twitter_callback(request: Request):
         print(f'Twitter OAuth error: {e}')
         return RedirectResponse('/login?error=oauth_failed')
 
+
+# -------------------- User Profile Routes --------------------
+
+@app.get('/user/{target_username}', response_class=HTMLResponse)
+def user_profile_page(target_username: str, request: Request, session: Optional[str] = Cookie(None)):
+    """Xem trang cá nhân của người dùng"""
+    username = get_current_user(session)
+    if not username:
+        return RedirectResponse(url='/login', status_code=303)
+    
+    # Get profile user info
+    profile_user = get_user(target_username)
+    if not profile_user:
+        return HTMLResponse('<h1>Người dùng không tồn tại</h1>', status_code=404)
+    
+    # Get current user info
+    user_obj = get_user(username)
+    
+    # Check if viewing own profile
+    is_own_profile = (username == target_username)
+    
+    # Get follower/following stats
+    followers = get_followers(target_username)
+    following = get_following(target_username)
+    followers_count = len(followers)
+    following_count = len(following)
+    
+    # Check if current user is following target user
+    is_following_user = is_following(username, target_username) if not is_own_profile else False
+    
+    # Get user's sets count
+    user_sets = list_sets(user_id=target_username)
+    sets_count = len(user_sets)
+    
+    # Get user's posts (text posts only, not vocab sets)
+    from .storage import get_user_posts
+    posts = get_user_posts(target_username, limit=20)
+
+    # Add liked/saved flags similar to feed for current viewer
+    try:
+        for p in posts:
+            p['is_liked'] = is_liked_by_user(p['id'], username)
+            p['is_bookmarked'] = is_bookmarked(p['id'], username)
+            # Populate social stats for consistency with feed
+            p['likes_count'] = get_likes_count(p['id'])
+            p['comments_count'] = get_comments_count(p['id'])
+            p['shares_count'] = get_shares_count(p['id'])
+    except Exception:
+        pass
+    
+    # Format time function
+    def format_time(dt_str):
+        if not dt_str:
+            return 'Gần đây'
+        try:
+            dt = datetime.fromisoformat(dt_str)
+            now = datetime.now()
+            diff = (now - dt).total_seconds()
+            
+            if diff < 60:
+                return 'Vừa xong'
+            elif diff < 3600:
+                return f'{int(diff / 60)} phút trước'
+            elif diff < 86400:
+                return f'{int(diff / 3600)} giờ trước'
+            elif diff < 604800:
+                return f'{int(diff / 86400)} ngày trước'
+            else:
+                return dt.strftime('%d/%m/%Y')
+        except:
+            return 'Gần đây'
+    
+    return templates.TemplateResponse('user_profile.html', {
+        'request': request,
+        'username': username,
+        'user': user_obj,
+        'profile_user': profile_user,
+        'is_own_profile': is_own_profile,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'sets_count': sets_count,
+        'is_following': is_following_user,
+        'posts': posts,
+        'format_time': format_time,
+    })
+
+
+@app.post('/api/users/{target_username}/follow')
+async def api_follow_user(target_username: str, request: Request, session: Optional[str] = Cookie(None)):
+    """Follow/Unfollow người dùng"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    if username == target_username:
+        return JSONResponse({'error': 'Không thể follow chính mình'}, status_code=400)
+    
+    data = await request.json()
+    unfollow = data.get('unfollow', False)
+    
+    if unfollow:
+        success = unfollow_user(username, target_username)
+    else:
+        success = follow_user(username, target_username)
+    
+    if not success:
+        return JSONResponse({'error': 'Không thể thực hiện'}, status_code=400)
+    
+    return JSONResponse({
+        'success': True,
+        'is_following': not unfollow
+    })
+
+
+@app.post('/api/profile/update')
+async def api_update_profile(request: Request, session: Optional[str] = Cookie(None)):
+    """Cập nhật thông tin cá nhân"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+    
+    data = await request.json()
+    display_name = data.get('display_name')
+    bio = data.get('bio')
+    location = data.get('location')
+    website = data.get('website')
+    facebook = data.get('facebook')
+    instagram = data.get('instagram')
+    twitter = data.get('twitter')
+    school = data.get('school')
+    
+    updated = update_user_profile(
+        username,
+        display_name=display_name,
+        bio=bio,
+        location=location,
+        website=website,
+        facebook=facebook,
+        instagram=instagram,
+        twitter=twitter,
+        school=school
+    )
+    
+    if updated:
+        return JSONResponse({'success': True, 'user': updated})
+    else:
+        return JSONResponse({'error': 'Không thể cập nhật'}, status_code=400)
+
+
+@app.get('/user/{target_username}/sets', response_class=HTMLResponse)
+def user_profile_sets_page(target_username: str, request: Request, session: Optional[str] = Cookie(None)):
+    """Xem trang bộ từ của người dùng"""
+    username = get_current_user(session)
+    if not username:
+        return RedirectResponse(url='/login', status_code=303)
+    
+    # Get profile user info
+    profile_user = get_user(target_username)
+    if not profile_user:
+        return HTMLResponse('<h1>Người dùng không tồn tại</h1>', status_code=404)
+    
+    # Get current user info
+    user_obj = get_user(username)
+    
+    # Check if viewing own profile
+    is_own_profile = (username == target_username)
+    
+    # Get follower/following stats
+    followers_count = len(get_followers(target_username))
+    following_count = len(get_following(target_username))
+    
+    # Get user's sets
+    user_sets = list_sets(user_id=target_username)
+    
+    # Add stats to each set
+    for s in user_sets:
+        terms = list_terms(s['id'])
+        s['term_count'] = len(terms)
+        s['likes_count'] = get_likes_count(s['id'])
+        s['comments_count'] = get_comments_count(s['id'])
+        s['shares_count'] = get_shares_count(s['id'])
+    
+    # Filter by visibility if not own profile
+    if not is_own_profile:
+        user_sets = [s for s in user_sets if s.get('visibility') == 'public']
+    
+    sets_count = len(user_sets)
+    public_count = len([s for s in user_sets if s.get('visibility') == 'public'])
+    private_count = len([s for s in user_sets if s.get('visibility') == 'private'])
+    
+    return templates.TemplateResponse('user_profile_sets.html', {
+        'request': request,
+        'username': username,
+        'user': user_obj,
+        'profile_user': profile_user,
+        'is_own_profile': is_own_profile,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'sets_count': sets_count,
+        'public_count': public_count,
+        'private_count': private_count,
+        'sets': user_sets,
+    })
+
+
+@app.get('/user/{target_username}/about', response_class=HTMLResponse)
+def user_profile_about_page(target_username: str, request: Request, session: Optional[str] = Cookie(None)):
+    """Xem trang giới thiệu của người dùng"""
+    username = get_current_user(session)
+    if not username:
+        return RedirectResponse(url='/login', status_code=303)
+    
+    # Get profile user info
+    profile_user = get_user(target_username)
+    if not profile_user:
+        return HTMLResponse('<h1>Người dùng không tồn tại</h1>', status_code=404)
+    
+    # Get current user info
+    user_obj = get_user(username)
+    
+    # Check if viewing own profile
+    is_own_profile = (username == target_username)
+    
+    # Get follower/following stats
+    followers_count = len(get_followers(target_username))
+    following_count = len(get_following(target_username))
+    
+    # Get user's sets count and total terms
+    user_sets = list_sets(user_id=target_username)
+    sets_count = len(user_sets)
+    
+    total_terms = 0
+    for s in user_sets:
+        terms = list_terms(s['id'])
+        total_terms += len(terms)
+    
+    # Get recent activities (sample data - can be enhanced later)
+    recent_activities = []
+    
+    # Add recent sets as activities
+    sorted_sets = sorted(user_sets, key=lambda x: x.get('created_at', ''), reverse=True)[:5]
+    for s in sorted_sets:
+        try:
+            from datetime import datetime
+            created = datetime.fromisoformat(s.get('created_at', ''))
+            date_str = created.strftime('%d/%m/%Y %H:%M')
+        except:
+            date_str = 'Gần đây'
+        
+        recent_activities.append({
+            'icon': '📚',
+            'title': f'Tạo bộ từ "{s["name"]}"',
+            'description': f'{s.get("description", "Không có mô tả")[:50]}...' if len(s.get("description", "")) > 50 else s.get("description", ""),
+            'date': date_str
+        })
+    
+    return templates.TemplateResponse('user_profile_about.html', {
+        'request': request,
+        'username': username,
+        'user': user_obj,
+        'profile_user': profile_user,
+        'is_own_profile': is_own_profile,
+        'followers_count': followers_count,
+        'following_count': following_count,
+        'sets_count': sets_count,
+        'total_terms': total_terms,
+        'recent_activities': recent_activities,
+    })
 
 
