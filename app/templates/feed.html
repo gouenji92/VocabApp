@@ -324,25 +324,25 @@
           <div class="post-actions">
             <button class="action-btn like-btn {% if post.is_liked %}liked{% endif %}" onclick="toggleLike('{{ post.id }}', this)" data-post-id="{{ post.id }}">
               {% if post.is_liked %}
-              <img src="{{ url_for('static', path='/icon_heart_filled.svg') }}" class="icon-svg" alt="Like" />
+              <span class="iconify icon-heart-filled icon-20 icon-gradient-accent"></span>
               {% else %}
-              <img src="{{ url_for('static', path='/icon_heart.svg') }}" class="icon-svg" alt="Like" />
+              <span class="iconify icon-heart icon-20 icon-gradient-accent"></span>
               {% endif %}
               <span>Thích</span>
             </button>
             <button class="action-btn comment-btn" onclick="toggleComments('{{ post.id }}')">
-              <img src="{{ url_for('static', path='/icon_comment.svg') }}" class="icon-svg" alt="Comment" />
+              <span class="iconify icon-comment icon-20 icon-gradient-accent"></span>
               <span>Bình luận</span>
             </button>
             <button class="action-btn share-btn" onclick="shareSet('{{ post.id }}', '{{ post.name or post.content[:30] }}')">
-              <img src="{{ url_for('static', path='/icon_share.svg') }}" class="icon-svg" alt="Share" />
+              <span class="iconify icon-share icon-20 icon-gradient-accent"></span>
               <span>Chia sẻ</span>
             </button>
             <button class="action-btn bookmark-btn {% if post.is_bookmarked %}saved{% endif %}" onclick="toggleBookmark('{{ post.id }}', this)" data-post-id="{{ post.id }}">
               {% if post.is_bookmarked %}
-              <img src="{{ url_for('static', path='/icon_bookmark_filled.svg') }}" class="icon-svg" alt="Bookmark" />
+              <span class="iconify icon-bookmark-filled icon-20 icon-gradient-accent"></span>
               {% else %}
-              <img src="{{ url_for('static', path='/icon_bookmark.svg') }}" class="icon-svg" alt="Bookmark" />
+              <span class="iconify icon-bookmark icon-20 icon-gradient-accent"></span>
               {% endif %}
               <span>Lưu</span>
             </button>

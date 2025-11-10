@@ -703,7 +703,7 @@
                     <span class="follow-text">{% if is_following %}✓ Đang theo dõi{% else %}+ Theo dõi{% endif %}</span>
                 </button>
                 <button class="btn-message" onclick="alert('Tính năng nhắn tin đang phát triển')">
-                    <img src="/static/icon_message.svg" alt="" style="width: 18px; height: 18px; margin-right: 4px;">
+                    <span class="iconify icon-message icon-18 icon-gradient-accent" style="margin-right:4px;"></span>
                     Nhắn tin
                 </button>
                 {% endif %}
@@ -843,7 +843,7 @@
 
                     {% if post.likes_count > 0 or post.comments_count > 0 or post.shares_count > 0 %}
                     <div class="post-stats" style="padding:8px 16px; display:flex; justify-content:space-between; color:#65676b; font-size:0.9em; border-top:1px solid #e4e6eb;">
-                        <span class="stat-item">{% if post.likes_count > 0 %}<img src="/static/icon_heart.svg" alt="" style="width:16px;height:16px;vertical-align:-3px;margin-right:4px;opacity:.85;">{{ post.likes_count }}{% endif %}</span>
+                        <span class="stat-item">{% if post.likes_count > 0 %}<span class="iconify icon-heart icon-16 icon-gradient-accent" style="margin-right:4px;opacity:.85;"></span>{{ post.likes_count }}{% endif %}</span>
                         <span>
                             {% if post.comments_count > 0 %}{{ post.comments_count }} bình luận{% endif %}
                             {% if post.shares_count > 0 %}{% if post.comments_count > 0 %} · {% endif %}{{ post.shares_count }} lượt chia sẻ{% endif %}
@@ -872,9 +872,9 @@
                     <div class="post-actions">
                         <button class="action-btn like-btn {% if post.is_liked %}liked{% endif %}" onclick="toggleLikeProfilePost('{{ post.id }}', this)" title="Thích bài viết">
                             {% if post.is_liked %}
-                            <img src="/static/icon_heart_filled.svg" alt="Like" style="width: 20px; height: 20px;" class="icon-like icon-svg">
+                            <span class="iconify icon-heart-filled icon-20 icon-gradient-accent"></span>
                             {% else %}
-                            <img src="/static/icon_heart.svg" alt="Like" style="width: 20px; height: 20px;" class="icon-like icon-svg">
+                            <span class="iconify icon-heart icon-20 icon-gradient-accent"></span>
                             {% endif %}
                             <span>Thích</span>
                         </button>
@@ -884,15 +884,15 @@
                         </button>
                         {% if post.attached_set %}
                         <button class="action-btn share-btn" onclick="shareSet('{{ post.attached_set.id }}', '{{ post.attached_set.name }}')" title="Chia sẻ bộ từ" style="flex:1;">
-                            <img src="/static/icon_share.svg" alt="Share" style="width: 20px; height: 20px;">
+                            <span class="iconify icon-share icon-20 icon-gradient-accent"></span>
                             <span>Chia sẻ</span>
                         </button>
                         {% endif %}
                         <button class="action-btn bookmark-btn {% if post.is_bookmarked %}saved{% endif %}" onclick="toggleBookmarkProfilePost('{{ post.id }}', this)" title="Lưu bài viết">
                             {% if post.is_bookmarked %}
-                            <img src="/static/icon_bookmark_filled.svg" alt="Bookmark" style="width: 20px; height: 20px;" class="icon-bookmark icon-svg">
+                            <span class="iconify icon-bookmark-filled icon-20 icon-gradient-accent"></span>
                             {% else %}
-                            <img src="/static/icon_bookmark.svg" alt="Bookmark" style="width: 20px; height: 20px;" class="icon-bookmark icon-svg">
+                            <span class="iconify icon-bookmark icon-20 icon-gradient-accent"></span>
                             {% endif %}
                             <span>Lưu</span>
                         </button>

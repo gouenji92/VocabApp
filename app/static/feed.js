@@ -191,20 +191,32 @@ async function toggleLike(setId, button) {
       const data = await response.json();
       button.classList.toggle('liked');
       
-      // Update icon
-      const icon = button.querySelector('.icon-svg');
-      const iconPath = icon.src;
-      if (data.liked) {
-        icon.src = iconPath.replace('icon_heart.svg', 'icon_heart_filled.svg');
-      } else {
-        icon.src = iconPath.replace('icon_heart_filled.svg', 'icon_heart.svg');
+      // Update icon (iconify classes)
+      const icon = button.querySelector('.iconify') || button.querySelector('.icon-svg');
+      if (icon) {
+        if (data.liked) {
+          icon.classList.remove('icon-heart');
+          icon.classList.add('icon-heart-filled');
+          // Fallback if using <img>
+          if (icon.tagName === 'IMG') {
+            icon.src = icon.src.replace('icon_heart.svg', 'icon_heart_filled.svg');
+          }
+        } else {
+          icon.classList.remove('icon-heart-filled');
+          icon.classList.add('icon-heart');
+          if (icon.tagName === 'IMG') {
+            icon.src = icon.src.replace('icon_heart_filled.svg', 'icon_heart.svg');
+          }
+        }
       }
       
       updateLikeCount(setId, data.likes_count);
       
       // Animate
-      icon.style.transform = 'scale(1.3)';
-      setTimeout(() => icon.style.transform = 'scale(1)', 300);
+      if (icon) {
+        icon.style.transform = 'scale(1.3)';
+        setTimeout(() => icon.style.transform = 'scale(1)', 300);
+      }
     }
   } catch (error) {
     console.error('Error toggling like:', error);
@@ -217,7 +229,7 @@ function updateLikeCount(setId, count) {
   
   const stats = card.querySelector('.post-stats .stat-item');
   if (stats) {
-    stats.innerHTML = count > 0 ? `❤️ ${count}` : '';
+    stats.innerHTML = count > 0 ? `<span class="iconify icon-heart icon-16 icon-gradient-accent" style="margin-right:4px;opacity:.85;"></span>${count}` : '';
   }
 }
 
@@ -233,20 +245,31 @@ async function toggleBookmark(setId, button) {
       const data = await response.json();
       button.classList.toggle('saved');
       
-      // Update icon
-      const icon = button.querySelector('.icon-svg');
-      const iconPath = icon.src;
+      // Update icon (iconify classes)
+      const icon = button.querySelector('.iconify') || button.querySelector('.icon-svg');
       if (data.saved) {
-        icon.src = iconPath.replace('icon_bookmark.svg', 'icon_bookmark_filled.svg');
+        if (icon) {
+          icon.classList.remove('icon-bookmark');
+          icon.classList.add('icon-bookmark-filled');
+          if (icon.tagName === 'IMG') {
+            icon.src = icon.src.replace('icon_bookmark.svg', 'icon_bookmark_filled.svg');
+          }
+          icon.style.transform = 'scale(1.2) rotate(10deg)';
+          setTimeout(() => icon.style.transform = 'scale(1) rotate(0)', 300);
+        }
         window.toast.show('Đã lưu bộ từ', 'success');
       } else {
-        icon.src = iconPath.replace('icon_bookmark_filled.svg', 'icon_bookmark.svg');
+        if (icon) {
+          icon.classList.remove('icon-bookmark-filled');
+          icon.classList.add('icon-bookmark');
+          if (icon.tagName === 'IMG') {
+            icon.src = icon.src.replace('icon_bookmark_filled.svg', 'icon_bookmark.svg');
+          }
+          icon.style.transform = 'scale(1.2) rotate(10deg)';
+          setTimeout(() => icon.style.transform = 'scale(1) rotate(0)', 300);
+        }
         window.toast.show('Đã bỏ lưu', 'info');
       }
-      
-      // Animate
-      icon.style.transform = 'scale(1.2) rotate(10deg)';
-      setTimeout(() => icon.style.transform = 'scale(1) rotate(0)', 300);
     }
   } catch (error) {
     console.error('Error toggling bookmark:', error);
@@ -290,15 +313,15 @@ function renderComment(comment, setId) {
   const menuHTML = isOwner ? `
     <div style="position: relative; margin-left: auto;">
       <button class="comment-menu" onclick="toggleCommentMenu(event, '${comment.id}')">
-        <img src="/static/icon_more.svg" alt="Menu" style="width: 16px; height: 16px;">
+        <span class="iconify icon-more icon-16 icon-gradient-accent"></span>
       </button>
       <div class="menu-dropdown" id="comment-menu-${comment.id}">
         <button class="menu-item" onclick="editComment('${comment.id}', event)">
-          <img src="/static/icon_edit.svg" alt="Edit">
+          <span class="iconify icon-edit icon-18 icon-gradient-accent"></span>
           <span>Chỉnh sửa</span>
         </button>
         <button class="menu-item danger" onclick="deleteComment('${comment.id}', event)">
-          <img src="/static/icon_delete.svg" alt="Delete">
+          <span class="iconify icon-delete icon-18 icon-gradient-accent"></span>
           <span>Xóa</span>
         </button>
       </div>
@@ -343,15 +366,15 @@ function renderReply(reply) {
   const menuHTML = isOwner ? `
     <div style="position: relative; margin-left: auto;">
       <button class="comment-menu" onclick="toggleReplyMenu(event, '${reply.id}')">
-        <img src="/static/icon_more.svg" alt="Menu" style="width: 14px; height: 14px;">
+        <span class="iconify icon-more icon-14 icon-gradient-accent"></span>
       </button>
       <div class="menu-dropdown" id="reply-menu-${reply.id}">
         <button class="menu-item" onclick="editReply('${reply.id}', event)">
-          <img src="/static/icon_edit.svg" alt="Edit">
+          <span class="iconify icon-edit icon-18 icon-gradient-accent"></span>
           <span>Chỉnh sửa</span>
         </button>
         <button class="menu-item danger" onclick="deleteReply('${reply.id}', event)">
-          <img src="/static/icon_delete.svg" alt="Delete">
+          <span class="iconify icon-delete icon-18 icon-gradient-accent"></span>
           <span>Xóa</span>
         </button>
       </div>
