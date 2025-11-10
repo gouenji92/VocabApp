@@ -305,7 +305,7 @@ function renderComment(comment, setId) {
     : `<div class="comment-avatar">${comment.user_display_name ? comment.user_display_name[0].toUpperCase() : 'U'}</div>`;
   
   const repliesHTML = comment.replies && comment.replies.length > 0
-    ? `<div class="comment-replies">${comment.replies.map(reply => renderReply(reply)).join('')}</div>`
+    ? `<div class="comment-replies">${comment.replies.map(reply => renderReply(reply, comment.id)).join('')}</div>`
     : '';
   
   // Check if current user is the comment author
@@ -356,7 +356,7 @@ function renderComment(comment, setId) {
   `;
 }
 
-function renderReply(reply) {
+function renderReply(reply, parentCommentId) {
   const avatarHTML = reply.user_avatar 
     ? `<img src="${reply.user_avatar}" class="comment-avatar" style="width:28px;height:28px;" alt="${reply.user_display_name}" />`
     : `<div class="comment-avatar" style="width:28px;height:28px;font-size:0.8em;">${reply.user_display_name ? reply.user_display_name[0].toUpperCase() : 'U'}</div>`;
@@ -382,17 +382,26 @@ function renderReply(reply) {
   ` : '';
   
   const editedIndicator = reply.edited_at ? '<span style="color: #65676b;"> · Đã chỉnh sửa</span>' : '';
+  const displayName = reply.user_display_name || reply.username || '';
+  const mention = displayName ? '@' + displayName + ' ' : '';
   
   return `
     <div class="comment-item" id="reply-${reply.id}" style="margin-bottom:10px; position: relative;">
       ${avatarHTML}
       <div class="comment-content" style="flex: 1;">
         <div class="comment-bubble">
-          <div class="comment-author">${reply.user_display_name || reply.username}</div>
+          <div class="comment-author" style="cursor:pointer;" title="Trả lời ${displayName}"
+               onclick="showReplyInput('${parentCommentId}', '${mention.replace(/'/g, "&#39;")}')">
+            ${reply.user_display_name || reply.username}
+          </div>
           <div class="comment-text">${escapeHtml(reply.content)}</div>
         </div>
         <div class="comment-actions">
           <span class="comment-time">${formatTime(reply.created_at)}${editedIndicator}</span>
+          <button class="comment-action-btn ${reply.is_liked ? 'liked' : ''}" onclick="toggleReplyLike('${reply.id}', this)">
+            ${reply.is_liked ? '❤️' : 'Thích'} ${reply.likes_count > 0 ? reply.likes_count : ''}
+          </button>
+          <button class="comment-action-btn" onclick="showReplyInput('${parentCommentId}', '${mention.replace(/'/g, "&#39;")}')">Trả lời</button>
         </div>
       </div>
       ${menuHTML}
@@ -448,6 +457,23 @@ async function postComment(setId) {
   }
 }
 
+async function toggleReplyLike(replyId, button) {
+  try {
+    const response = await fetch(`/api/replies/${replyId}/like`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      button.classList.toggle('liked');
+      button.textContent = data.liked ? `❤️ ${data.likes_count || ''}` : `Thích ${data.likes_count > 0 ? data.likes_count : ''}`;
+    }
+  } catch (error) {
+    console.error('Error toggling reply like:', error);
+  }
+}
+
 function updateCommentCount(setId, count) {
   const card = document.querySelector(`[data-set-id="${setId}"]`);
   if (!card) return;
@@ -476,14 +502,22 @@ async function toggleCommentLike(commentId, button) {
   }
 }
 
-function showReplyInput(commentId) {
+function showReplyInput(commentId, mention) {
   const replyInput = document.getElementById(`reply-input-${commentId}`);
-  if (replyInput.style.display === 'none') {
-    replyInput.style.display = 'flex';
-    document.getElementById(`reply-text-${commentId}`).focus();
-  } else {
-    replyInput.style.display = 'none';
+  if (!replyInput) return;
+  const inputEl = document.getElementById(`reply-text-${commentId}`);
+  const wasHidden = replyInput.style.display === 'none' || getComputedStyle(replyInput).display === 'none';
+  replyInput.style.display = 'flex';
+
+  if (mention) {
+    // Prefill mention if empty or doesn't start with same mention
+    if (!inputEl.value || !inputEl.value.startsWith(mention)) {
+      inputEl.value = mention + (inputEl.value || '');
+    }
   }
+  inputEl.focus();
+  // Ensure visible in viewport
+  replyInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 async function postReply(commentId) {

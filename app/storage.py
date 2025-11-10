@@ -145,6 +145,7 @@ POSTS_FILE = os.path.join(DATA_DIR, 'posts.json')
 BOOKMARKS_FILE = os.path.join(DATA_DIR, 'bookmarks.json')
 COMMENT_LIKES_FILE = os.path.join(DATA_DIR, 'comment_likes.json')
 COMMENT_REPLIES_FILE = os.path.join(DATA_DIR, 'comment_replies.json')
+REPLY_LIKES_FILE = os.path.join(DATA_DIR, 'reply_likes.json')
 
 def get_progress(term_id: str, user_id: str = 'default') -> Dict[str, Any]:
     progs = _load(PROGRESS_FILE)
@@ -601,6 +602,45 @@ def is_comment_liked(comment_id: str, user_id: str) -> bool:
     """Kiểm tra user đã thích comment chưa"""
     likes = _load(COMMENT_LIKES_FILE)
     return any(l.get('comment_id') == comment_id and l.get('user_id') == user_id for l in likes)
+
+
+# ---- Reply Likes ----
+def add_reply_like(reply_id: str, user_id: str) -> bool:
+    """Thích một trả lời (reply)"""
+    from datetime import datetime
+    likes = _load(REPLY_LIKES_FILE)
+
+    # Check if already liked
+    if any(l.get('reply_id') == reply_id and l.get('user_id') == user_id for l in likes):
+        return False
+
+    likes.append({
+        'id': str(uuid.uuid4()),
+        'reply_id': reply_id,
+        'user_id': user_id,
+        'created_at': datetime.utcnow().isoformat()
+    })
+    _save(REPLY_LIKES_FILE, likes)
+    return True
+
+def remove_reply_like(reply_id: str, user_id: str) -> bool:
+    """Bỏ thích trả lời"""
+    likes = _load(REPLY_LIKES_FILE)
+    filtered = [l for l in likes if not (l.get('reply_id') == reply_id and l.get('user_id') == user_id)]
+    if len(filtered) < len(likes):
+        _save(REPLY_LIKES_FILE, filtered)
+        return True
+    return False
+
+def get_reply_likes_count(reply_id: str) -> int:
+    """Đếm số lượt thích của trả lời"""
+    likes = _load(REPLY_LIKES_FILE)
+    return len([l for l in likes if l.get('reply_id') == reply_id])
+
+def is_reply_liked(reply_id: str, user_id: str) -> bool:
+    """Kiểm tra user đã thích reply chưa"""
+    likes = _load(REPLY_LIKES_FILE)
+    return any(l.get('reply_id') == reply_id and l.get('user_id') == user_id for l in likes)
 
 
 # ---- Comment Replies ----

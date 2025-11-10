@@ -27,7 +27,8 @@ from .storage import (
     add_comment_reply, get_comment_replies, get_comment_replies_count,
     delete_post, update_post, get_post,
     delete_comment, update_comment,
-    delete_reply, update_reply
+    delete_reply, update_reply,
+    add_reply_like, remove_reply_like, get_reply_likes_count, is_reply_liked
 )
 from .auth import create_user, verify_user, get_user
 from .auth import update_user_profile, change_user_password
@@ -1215,6 +1216,9 @@ async def api_get_comments(set_id: str, session: Optional[str] = Cookie(None)):
             if reply_user:
                 reply['user_avatar'] = reply_user.get('avatar')
                 reply['user_display_name'] = reply_user.get('display_name') or reply.get('username')
+            # Attach likes metadata for replies
+            reply['likes_count'] = get_reply_likes_count(reply['id'])
+            reply['is_liked'] = is_reply_liked(reply['id'], username) if username else False
 
     return JSONResponse(comments)
 
@@ -1340,6 +1344,9 @@ async def api_reply_comment(comment_id: str, request: Request, session: Optional
     if user_info:
         reply['user_avatar'] = user_info.get('avatar')
         reply['user_display_name'] = user_info.get('display_name') or username
+    # Include initial like meta for new reply
+    reply['likes_count'] = 0
+    reply['is_liked'] = False
     
     return JSONResponse({
         'success': True,
@@ -1456,6 +1463,33 @@ async def api_update_reply(reply_id: str, request: Request, session: Optional[st
         return JSONResponse({'success': True, 'message': 'Đã cập nhật trả lời'})
     else:
         return JSONResponse({'error': 'Cannot update reply'}, status_code=403)
+
+
+# ========== Reply Like APIs ==========
+
+@app.post('/api/replies/{reply_id}/like')
+async def api_like_reply(reply_id: str, session: Optional[str] = Cookie(None)):
+    """Thích/bỏ thích trả lời"""
+    username = get_current_user(session)
+    if not username:
+        return JSONResponse({'error': 'Not authenticated'}, status_code=401)
+
+    is_liked = is_reply_liked(reply_id, username)
+
+    if is_liked:
+        remove_reply_like(reply_id, username)
+        liked = False
+    else:
+        add_reply_like(reply_id, username)
+        liked = True
+
+    likes_count = get_reply_likes_count(reply_id)
+
+    return JSONResponse({
+        'success': True,
+        'liked': liked,
+        'likes_count': likes_count
+    })
 
 
 

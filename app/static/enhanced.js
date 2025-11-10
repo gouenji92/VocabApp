@@ -12,7 +12,15 @@ class ThemeManager {
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             this.theme = prefersDark ? 'dark' : 'light';
         } else {
-            this.theme = localStorage.getItem('theme') || 'light';
+            // Default to auto mode if first visit
+            if (!localStorage.getItem('theme') && !localStorage.getItem('themeMode')) {
+                this.themeMode = 'auto';
+                localStorage.setItem('themeMode', 'auto');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                this.theme = prefersDark ? 'dark' : 'light';
+            } else {
+                this.theme = localStorage.getItem('theme') || 'light';
+            }
         }
         // Apply theme
         this.applyTheme(this.theme);

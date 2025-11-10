@@ -1,81 +1,83 @@
 :root {
-  /* Instagram-inspired vibrant theme */
-  --instagram-purple: #833ab4;
-  --instagram-pink: #fd1d1d;
-  --instagram-orange: #fcb045;
-  --instagram-gradient: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
-  
-  /* Base colors - fresh and bright */
-  --bg: #fafafa;
+  /* Night Sky Palette */
+  --ns-deep-indigo: #1E0F75;
+  --ns-royal-blue: #1C1DAB;
+  --ns-bright-blue: #3785D8;
+  --ns-airy-blue: #ADC6E5;
+  --ns-lavender: #BF8CE1;
+  --ns-pink: #E893C5;
+  --ns-blush: #EBB2C3;
+  --ns-cloud: #CBD8E8;
+
+  --brand-gradient: linear-gradient(135deg, var(--ns-deep-indigo) 0%, var(--ns-royal-blue) 40%, var(--ns-bright-blue) 100%);
+  --accent-gradient: linear-gradient(135deg, var(--ns-lavender) 0%, var(--ns-pink) 55%, var(--ns-blush) 100%);
+  --soft-gradient: linear-gradient(135deg, var(--ns-airy-blue) 0%, var(--ns-cloud) 100%);
+
+  --bg: #f4f7fb;
   --bg-secondary: #ffffff;
   --surface: #ffffff;
   --surface-elevated: #ffffff;
-  --text: #262626;
-  --text-secondary: #8e8e8e;
-  --text-tertiary: #c7c7c7;
-  
-  /* Primary - Instagram pink/purple */
-  --primary: #e1306c;
-  --primary-hover: #c13584;
-  --primary-gradient: linear-gradient(135deg, #833ab4, #e1306c, #fd1d1d);
-  
-  /* Accent colors - vibrant and playful */
-  --accent: #0095f6;
-  --accent-hover: #0081d9;
-  --success: #00d856;
-  --warning: #ffcd3c;
-  --danger: #ed4956;
-  
-  --border: #dbdbdb;
-  --border-light: #efefef;
+  --text: #1E1E28;
+  --text-secondary: #5c6170;
+  --text-tertiary: #8d94a3;
+
+  --primary: var(--ns-bright-blue);
+  --primary-hover: var(--ns-royal-blue);
+  --primary-gradient: var(--brand-gradient);
+  --accent: var(--ns-lavender);
+  --accent-hover: var(--ns-pink);
+
+  --success: #2eaf6b;
+  --warning: #e6af3d;
+  --danger: #dc4b63;
+
+  --border: var(--ns-cloud);
+  --border-light: #e4edf5;
   --sidebar-bg: #ffffff;
-  --sidebar-hover: #fafafa;
-  --sidebar-active: #e1306c;
-  
-  /* Soft shadows for depth */
+  --sidebar-hover: #f0f5fa;
+  --sidebar-active: var(--primary);
+
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
   --radius-xl: 24px;
   --radius-full: 50%;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
-  --shadow-colored: 0 8px 24px rgba(131, 58, 180, 0.15);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 14px rgba(30,15,117,0.12);
+  --shadow-lg: 0 8px 34px rgba(28,29,171,0.18);
+  --shadow-colored: 0 8px 24px rgba(55,133,216,0.25);
   --blur: blur(20px);
 }
 
 [data-theme="dark"] {
-  /* Dark theme - Instagram night mode */
-  --bg: #000000;
-  --bg-secondary: #121212;
-  --surface: #1a1a1a;
-  --surface-elevated: #262626;
-  --text: #ffffff;
-  --text-secondary: #a8a8a8;
-  --text-tertiary: #737373;
-  
-  /* Keep vibrant colors in dark mode */
-  --primary: #e1306c;
-  --primary-hover: #c13584;
-  --primary-gradient: linear-gradient(135deg, #833ab4, #e1306c, #fd1d1d);
-  
-  --accent: #0095f6;
-  --accent-hover: #1ba1f2;
-  --success: #00d856;
-  --warning: #ffcd3c;
-  --danger: #ed4956;
-  
-  --border: #262626;
-  --border-light: #1a1a1a;
-  --sidebar-bg: #000000;
-  --sidebar-hover: #1a1a1a;
-  --sidebar-active: #e1306c;
-  
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.7);
-  --shadow-colored: 0 8px 24px rgba(131, 58, 180, 0.3);
+  --bg: #0f1120;
+  --bg-secondary: #16182b;
+  --surface: #1d2033;
+  --surface-elevated: #242845;
+  --text: #f5f7fb;
+  --text-secondary: #b0b6c5;
+  --text-tertiary: #7d8392;
+
+  --primary: var(--ns-bright-blue);
+  --primary-hover: var(--ns-royal-blue);
+  --primary-gradient: var(--brand-gradient);
+  --accent: var(--ns-lavender);
+  --accent-hover: var(--ns-pink);
+
+  --success: #2eaf6b;
+  --warning: #e6af3d;
+  --danger: #dc4b63;
+
+  --border: #2d3350;
+  --border-light: #1b1f31;
+  --sidebar-bg: #141729;
+  --sidebar-hover: #1d2033;
+  --sidebar-active: var(--primary);
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+  --shadow-md: 0 4px 16px rgba(28,29,171,0.35);
+  --shadow-lg: 0 8px 36px rgba(30,15,117,0.45);
+  --shadow-colored: 0 8px 26px rgba(55,133,216,0.4);
 }
 
 html, body {
@@ -189,7 +191,7 @@ label[for], .custum-file-upload {
 .sidebar-logo-icon {
   width: 36px;
   height: 36px;
-  background: var(--instagram-gradient);
+  background: var(--brand-gradient);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -203,7 +205,7 @@ label[for], .custum-file-upload {
 .sidebar-logo-text {
   font-size: 1.5rem;
   font-weight: 700;
-  background: var(--instagram-gradient);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -244,7 +246,7 @@ label[for], .custum-file-upload {
   color: var(--text);
   font-weight: 400;
   font-size: 16px;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
 }
@@ -252,11 +254,13 @@ label[for], .custum-file-upload {
 .sidebar-nav-link:hover {
   background: var(--sidebar-hover);
   transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-nav-link.active {
   font-weight: 600;
   color: var(--text);
+  background: var(--sidebar-hover);
 }
 
 .sidebar-nav-link.active::before {
@@ -265,19 +269,31 @@ label[for], .custum-file-upload {
   left: 0;
   width: 3px;
   height: 24px;
-  background: var(--instagram-gradient);
+  background: var(--brand-gradient);
   border-radius: 0 3px 3px 0;
+  animation: slideInLeft 0.3s ease;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .sidebar-nav-icon {
   font-size: 24px;
   width: 28px;
   text-align: center;
-  transition: transform 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-nav-link:hover .sidebar-nav-icon {
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(5deg);
 }
 
 /* Main Content Area */
@@ -361,14 +377,35 @@ label[for], .custum-file-upload {
   box-shadow: var(--shadow-sm);
   padding: 0;
   margin-bottom: 1.5rem;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--soft-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-  border-color: var(--text-tertiary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  border-color: var(--ns-airy-blue);
+}
+
+.card:hover::before {
+  opacity: 0.08;
+}
+
+.card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .card-header {
@@ -470,6 +507,61 @@ label[for], .custum-file-upload {
   box-shadow: none;
 }
 
+/* Button variants with Night Sky palette */
+.btn-soft {
+  background: var(--soft-gradient);
+  color: var(--text);
+  border: 1px solid var(--ns-airy-blue);
+  box-shadow: 0 2px 8px rgba(173, 198, 229, 0.2);
+  font-weight: 600;
+}
+
+.btn-soft:hover {
+  background: linear-gradient(135deg, var(--ns-cloud) 0%, var(--ns-airy-blue) 100%);
+  border-color: var(--ns-bright-blue);
+  box-shadow: 0 4px 16px rgba(55, 133, 216, 0.25);
+}
+
+.btn-outline-brand {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid transparent;
+  background-image: var(--brand-gradient);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  position: relative;
+  font-weight: 600;
+}
+
+.btn-outline-brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  z-index: -1;
+}
+
+.btn-outline-brand:hover {
+  color: white;
+  background: var(--brand-gradient);
+  box-shadow: var(--shadow-colored);
+}
+
+.btn-outline-accent {
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--ns-lavender);
+  font-weight: 600;
+}
+
+.btn-outline-accent:hover {
+  background: var(--accent-gradient);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 16px rgba(191, 140, 225, 0.3);
+}
+
 /* Action button with icon */
 .btn-icon {
   display: inline-flex;
@@ -544,14 +636,28 @@ input, select, textarea {
   margin-bottom: 1rem;
   background: var(--surface);
   color: var(--text);
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: inherit;
+  position: relative;
 }
 
 input:focus, select:focus, textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
+  box-shadow: 0 0 0 4px rgba(55, 133, 216, 0.12);
   outline: none;
+  background: var(--surface-elevated);
+}
+
+input:focus::after, 
+textarea:focus::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: var(--brand-gradient);
+  border-radius: var(--radius-sm);
+  opacity: 0.15;
+  z-index: -1;
+  pointer-events: none;
 }
 
 input::placeholder, textarea::placeholder {
@@ -765,7 +871,7 @@ header {
 /* Avatar with gradient border (story-style) */
 .avatar-gradient {
   padding: 2px;
-  background: var(--instagram-gradient);
+  background: var(--brand-gradient);
   border-radius: var(--radius-full);
   display: inline-block;
 }
@@ -856,7 +962,7 @@ header {
   width: 72px;
   height: 72px;
   padding: 3px;
-  background: var(--instagram-gradient);
+  background: var(--brand-gradient);
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
@@ -968,6 +1074,11 @@ header {
   z-index: 100;
   padding: 12px 20px;
   backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.top-header:hover {
+  box-shadow: var(--shadow-sm);
 }
 
 .header-content {
@@ -982,7 +1093,7 @@ header {
 .logo {
   font-size: 1.5rem;
   font-weight: 700;
-  background: var(--instagram-gradient);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1025,16 +1136,21 @@ header {
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 1.1em; /* restore slightly larger nav text */
+  font-size: 1.1em;
   line-height: 1.1;
   color: var(--text);
   text-decoration: none;
-  transition: all 0.18s ease;
-  font-weight: 600; /* bold text as before */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
 }
 
 .nav-btn:hover {
   background: var(--bg);
+  transform: translateY(-1px);
+}
+
+.nav-btn:active {
+  transform: translateY(0);
 }
 
 .nav-btn.active {
@@ -1043,7 +1159,7 @@ header {
 
 /* Gradient text matching each icon when active */
 .nav-btn.active {
-  background: linear-gradient(135deg, #ff9800, #d84315);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1051,7 +1167,7 @@ header {
 
 /* Feed icon gradient: orange to deep orange */
 .nav-btn.active[href="/feed"] {
-  background: linear-gradient(135deg, #ff9800, #d84315);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1059,7 +1175,7 @@ header {
 
 /* Collection icon gradient: coral to peach */
 .nav-btn.active[href="/sets"] {
-  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1067,7 +1183,7 @@ header {
 
 /* Chart icon gradient: yellow to red */
 .nav-btn.active[href="/dashboard"] {
-  background: linear-gradient(135deg, #ffc107, #f44336);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1075,7 +1191,7 @@ header {
 
 /* Account icon gradient: deep orange to orange */
 .nav-btn.active[href="/profile"] {
-  background: linear-gradient(135deg, #e65100, #ffb74d);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1084,7 +1200,7 @@ header {
 /* Settings icon gradient: orange to red */
 .nav-btn.settings-link.active .label,
 .nav-btn.active[href="/settings"] {
-  background: linear-gradient(135deg, #ff9800, #f44336);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1092,35 +1208,35 @@ header {
 
 /* Ensure dark mode keeps gradient visibility */
 [data-theme="dark"] .nav-btn.active {
-  background: linear-gradient(135deg, #ff9800, #d84315);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 [data-theme="dark"] .nav-btn.active[href="/feed"] {
-  background: linear-gradient(135deg, #ff9800, #d84315);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 [data-theme="dark"] .nav-btn.active[href="/sets"] {
-  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 [data-theme="dark"] .nav-btn.active[href="/dashboard"] {
-  background: linear-gradient(135deg, #ffc107, #f44336);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 [data-theme="dark"] .nav-btn.active[href="/profile"] {
-  background: linear-gradient(135deg, #e65100, #ffb74d);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1128,7 +1244,7 @@ header {
 
 [data-theme="dark"] .nav-btn.settings-link.active .label,
 [data-theme="dark"] .nav-btn.active[href="/settings"] {
-  background: linear-gradient(135deg, #ff9800, #f44336);
+  background: var(--brand-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1201,8 +1317,14 @@ button:active .iconify, a:active .iconify { transform: scale(.92); }
 
 /* Gradient utilities to match top-header active accent */
 .icon-gradient-accent { 
-  background: linear-gradient(135deg, #ff9800, #d84315); 
+  background: var(--accent-gradient); 
 }
+
+/* Utilities for Night Sky theme */
+.bg-brand-gradient { background: var(--brand-gradient); }
+.bg-accent-gradient { background: var(--accent-gradient); }
+.text-gradient-brand { background: var(--brand-gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.text-gradient-accent { background: var(--accent-gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 
 /* Map mask cho từng tên icon dùng ở dashboard & các trang đã triển khai */
 .icon-chart { -webkit-mask-image: url('/static/icon_chart.svg'); mask-image: url('/static/icon_chart.svg'); }
@@ -1533,9 +1655,30 @@ body.page-transition { opacity: 0; transition: opacity 0.2s ease; }
 .skeleton-text { height: 16px; margin-bottom: 8px; width: 100%; }
 .skeleton-avatar { width: 40px; height: 40px; border-radius: 50%; }
 .skeleton-card { height: 200px; border-radius: var(--radius-md); margin-bottom: 16px; }
-*:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: var(--radius-sm); }
-::selection { background: var(--primary); color: white; }
-::-moz-selection { background: var(--primary); color: white; }
+
+/* ========== FOCUS & SELECTION ========== */
+*:focus-visible { 
+  outline: 3px solid var(--ns-bright-blue); 
+  outline-offset: 3px; 
+  border-radius: var(--radius-sm); 
+  transition: outline 0.2s ease;
+}
+input:focus-visible, 
+textarea:focus-visible, 
+select:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(55, 133, 216, 0.15);
+}
+::selection { 
+  background: var(--accent-gradient); 
+  color: white; 
+}
+::-moz-selection { 
+  background: var(--ns-lavender); 
+  color: white; 
+}
+
 .loading-spinner { width: 48px; height: 48px; border: 4px solid rgba(255, 255, 255, 0.2); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
 .theme-toggle { width: 40px; height: 40px; border: none; background: transparent; color: var(--text); cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; padding: 0; margin: 0; }
 .theme-toggle:hover { background: var(--sidebar-hover); transform: scale(1.1); }
