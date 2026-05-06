@@ -94,14 +94,14 @@ def get_current_user(session: Optional[str] = Cookie(None)) -> Optional[str]:
 # -------------------- Auth Routes --------------------
 @app.get('/login', response_class=HTMLResponse)
 def login_page(request: Request):
-    return templates.TemplateResponse('login.html', { 'request': request, 'error': None })
+    return templates.TemplateResponse('login.html', context={ 'request': request, 'error': None })
 
 
 @app.post('/login')
 def login(request: Request, username: str = Form(...), password: str = Form(...)):
     user = verify_user(username, password)
     if not user:
-        return templates.TemplateResponse('login.html', { 'request': request, 'error': 'Tên đăng nhập hoặc mật khẩu không đúng' })
+        return templates.TemplateResponse('login.html', context={ 'request': request, 'error': 'Tên đăng nhập hoặc mật khẩu không đúng' })
     
     token = create_session_token(username)
     response = RedirectResponse(url='/feed', status_code=303)
@@ -111,18 +111,18 @@ def login(request: Request, username: str = Form(...), password: str = Form(...)
 
 @app.get('/register', response_class=HTMLResponse)
 def register_page(request: Request):
-    return templates.TemplateResponse('register.html', { 'request': request, 'error': None })
+    return templates.TemplateResponse('register.html', context={ 'request': request, 'error': None })
 
 
 @app.post('/register')
 def register(request: Request, username: str = Form(...), password: str = Form(...), password2: str = Form(...), email: str = Form(None)):
     if password != password2:
-        return templates.TemplateResponse('register.html', { 'request': request, 'error': 'Mật khẩu không khớp' })
+        return templates.TemplateResponse('register.html', context={ 'request': request, 'error': 'Mật khẩu không khớp' })
     
     try:
         create_user(username, password, email)
     except ValueError as e:
-        return templates.TemplateResponse('register.html', { 'request': request, 'error': str(e) })
+        return templates.TemplateResponse('register.html', context={ 'request': request, 'error': str(e) })
     
     # Auto login after register
     token = create_session_token(username)
@@ -151,7 +151,7 @@ def dashboard_page(request: Request, session: Optional[str] = Cookie(None)):
     recent_sets = list_sets(user_id=username)[:5]  # Get 5 most recent sets
     user_obj = get_user(username)
     
-    return templates.TemplateResponse('dashboard.html', {
+    return templates.TemplateResponse('dashboard.html', context={
         'request': request,
         'username': username,
         'user': user_obj,
@@ -244,7 +244,7 @@ def create_set_page(request: Request, session: Optional[str] = Cookie(None)):
     if not username:
         return RedirectResponse(url='/login', status_code=303)
     user_obj = get_user(username)
-    return templates.TemplateResponse('create_set.html', { 'request': request, 'username': username, 'user': user_obj })
+    return templates.TemplateResponse('create_set.html', context={ 'request': request, 'username': username, 'user': user_obj })
 
 
 @app.post('/sets/create')
@@ -305,7 +305,7 @@ def sets_page(request: Request, session: Optional[str] = Cookie(None)):
         return RedirectResponse(url='/login', status_code=303)
     sets = list_sets(user_id=username)
     user_obj = get_user(username)
-    return templates.TemplateResponse('sets_list.html', { 'request': request, 'sets': sets, 'username': username, 'user': user_obj })
+    return templates.TemplateResponse('sets_list.html', context={ 'request': request, 'sets': sets, 'username': username, 'user': user_obj })
 
 
 @app.get('/sets/{set_id}', response_class=HTMLResponse)
@@ -321,7 +321,7 @@ def set_detail_page(set_id: str, request: Request, session: Optional[str] = Cook
         return HTMLResponse('Unauthorized', status_code=403)
     terms = list_terms(set_id)
     user_obj = get_user(username)
-    return templates.TemplateResponse('set_detail.html', { 'request': request, 'vset': vset, 'terms': terms, 'username': username, 'user': user_obj })
+    return templates.TemplateResponse('set_detail.html', context={ 'request': request, 'vset': vset, 'terms': terms, 'username': username, 'user': user_obj })
 
 
 @app.get('/sets/{set_id}/export')
@@ -409,7 +409,7 @@ def edit_set_page(set_id: str, request: Request, session: Optional[str] = Cookie
     if vset.get('user_id') != username:
         return HTMLResponse('Unauthorized', status_code=403)
     user_obj = get_user(username)
-    return templates.TemplateResponse('set_edit.html', { 'request': request, 'vset': vset, 'username': username, 'user': user_obj })
+    return templates.TemplateResponse('set_edit.html', context={ 'request': request, 'vset': vset, 'username': username, 'user': user_obj })
 
 
 @app.post('/sets/{set_id}/edit')
@@ -479,7 +479,7 @@ def edit_term_page(term_id: str, request: Request, session: Optional[str] = Cook
         return HTMLResponse('Unauthorized', status_code=403)
     
     user_obj = get_user(username)
-    return templates.TemplateResponse('term_edit.html', { 'request': request, 'term': term, 'vset': vset, 'username': username, 'user': user_obj })
+    return templates.TemplateResponse('term_edit.html', context={ 'request': request, 'term': term, 'vset': vset, 'username': username, 'user': user_obj })
 
 
 @app.post('/terms/{term_id}/edit')
@@ -542,7 +542,7 @@ def study_page(set_id: str, request: Request, mode: str = 'flashcard', session: 
     
     # If no mode or want to choose, show mode selection
     if not mode or mode == 'select':
-        return templates.TemplateResponse('study_mode.html', { 'request': request, 'set_id': set_id, 'set_name': vset['name'], 'username': username, 'user': user_obj })
+        return templates.TemplateResponse('study_mode.html', context={ 'request': request, 'set_id': set_id, 'set_name': vset['name'], 'username': username, 'user': user_obj })
     
     # Route to appropriate study template
     if mode == 'flashcard':
@@ -554,7 +554,7 @@ def study_page(set_id: str, request: Request, mode: str = 'flashcard', session: 
     else:
         template = 'study.html'
     
-    return templates.TemplateResponse(template, { 'request': request, 'set_id': set_id, 'set_name': vset['name'], 'mode': mode, 'username': username, 'user': user_obj })
+    return templates.TemplateResponse(template, context={ 'request': request, 'set_id': set_id, 'set_name': vset['name'], 'mode': mode, 'username': username, 'user': user_obj })
 
 
 # ---- Spaced Repetition API ----
@@ -814,7 +814,7 @@ def browse_public_sets(
     user_obj = get_user(username)
     sets = list_public_sets(search=search, language_from=language_from, language_to=language_to)
     
-    return templates.TemplateResponse('browse.html', {
+    return templates.TemplateResponse('browse.html', context={
         'request': request,
         'sets': sets,
         'username': username,
@@ -906,7 +906,7 @@ def feed_page(request: Request, session: Optional[str] = Cookie(None)):
         except:
             return 'Vừa xong'
     
-    return templates.TemplateResponse('feed.html', {
+    return templates.TemplateResponse('feed.html', context={
         'request': request,
         'posts': posts,
         'username': username,
@@ -925,7 +925,7 @@ def settings_page(request: Request, session: Optional[str] = Cookie(None)):
     
     user_obj = get_user(username)
     
-    return templates.TemplateResponse('settings.html', {
+    return templates.TemplateResponse('settings.html', context={
         'request': request,
         'username': username,
         'user': user_obj
@@ -940,7 +940,7 @@ def profile_page(request: Request, session: Optional[str] = Cookie(None)):
     if not username:
         return RedirectResponse(url='/login', status_code=303)
     user_obj = get_user(username)
-    return templates.TemplateResponse('profile.html', {
+    return templates.TemplateResponse('profile.html', context={
         'request': request,
         'username': username,
         'user': user_obj,
@@ -962,7 +962,7 @@ async def profile_update(request: Request, session: Optional[str] = Cookie(None)
         name = avatar.filename
         ext = os.path.splitext(name)[1].lower()
         if ext not in ['.jpg', '.jpeg', '.png']:
-            return templates.TemplateResponse('profile.html', {
+            return templates.TemplateResponse('profile.html', context={
                 'request': request,
                 'username': username,
                 'user': get_user(username),
@@ -971,7 +971,7 @@ async def profile_update(request: Request, session: Optional[str] = Cookie(None)
             })
         data = await avatar.read()
         if len(data) > 2 * 1024 * 1024:  # 2MB
-            return templates.TemplateResponse('profile.html', {
+            return templates.TemplateResponse('profile.html', context={
                 'request': request,
                 'username': username,
                 'user': get_user(username),
@@ -986,7 +986,7 @@ async def profile_update(request: Request, session: Optional[str] = Cookie(None)
         avatar_url = f"/static/avatars/{filename}"
 
     updated = update_user_profile(username, display_name=display_name, email=email, avatar=avatar_url)
-    return templates.TemplateResponse('profile.html', {
+    return templates.TemplateResponse('profile.html', context={
         'request': request,
         'username': username,
         'user': updated or get_user(username),
@@ -1003,7 +1003,7 @@ async def profile_change_password(request: Request, session: Optional[str] = Coo
     if not username:
         return RedirectResponse(url='/login', status_code=303)
     if new_password != new_password2:
-        return templates.TemplateResponse('profile.html', {
+        return templates.TemplateResponse('profile.html', context={
             'request': request,
             'username': username,
             'user': get_user(username),
@@ -1012,14 +1012,14 @@ async def profile_change_password(request: Request, session: Optional[str] = Coo
         })
     ok = change_user_password(username, current_password, new_password)
     if not ok:
-        return templates.TemplateResponse('profile.html', {
+        return templates.TemplateResponse('profile.html', context={
             'request': request,
             'username': username,
             'user': get_user(username),
             'message': None,
             'error': 'Mật khẩu hiện tại không đúng'
         })
-    return templates.TemplateResponse('profile.html', {
+    return templates.TemplateResponse('profile.html', context={
         'request': request,
         'username': username,
         'user': get_user(username),
