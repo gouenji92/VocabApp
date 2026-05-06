@@ -35,8 +35,19 @@ from .auth import update_user_profile, change_user_password
 from .auth import follow_user, unfollow_user, is_following, get_followers, get_following
 from . import ai_helper
 from .oauth import oauth
+from .db import init_db
 
 app = FastAPI(title='Vocab App (VN)')
+
+# Initialize database on startup (deferred from module load)
+@app.on_event("startup")
+async def startup_event():
+    try:
+        init_db()
+        print("✅ Database initialized successfully")
+    except Exception as e:
+        print(f"⚠️  Database initialization warning: {e}")
+        # Don't crash - will retry on first request
 
 base_dir = os.path.dirname(__file__)
 templates = Jinja2Templates(directory=os.path.join(base_dir, 'templates'))

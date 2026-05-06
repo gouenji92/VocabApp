@@ -194,8 +194,17 @@ def session_scope():
         session.close()
 
 
+_db_initialized = False
+
 def init_db() -> None:
-    Base.metadata.create_all(bind=engine)
-
-
-init_db()
+    """Initialize database tables. Called on app startup."""
+    global _db_initialized
+    if _db_initialized:
+        return
+    try:
+        Base.metadata.create_all(bind=engine)
+        _db_initialized = True
+        print("[INFO] Database tables initialized successfully")
+    except Exception as e:
+        print(f"[WARN] Database initialization error: {e}")
+        # Don't raise - will retry on next request
