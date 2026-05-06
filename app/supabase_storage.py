@@ -1,3 +1,220 @@
+import os
+import json
+from typing import Dict, Any, List
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+os.makedirs(DATA_DIR, exist_ok=True)
+
+USERS_FILE = os.path.join(DATA_DIR, 'users.json')
+SETS_FILE = os.path.join(DATA_DIR, 'sets.json')
+TERMS_FILE = os.path.join(DATA_DIR, 'terms.json')
+PROGRESS_FILE = os.path.join(DATA_DIR, 'progress.json')
+LIKES_FILE = os.path.join(DATA_DIR, 'likes.json')
+COMMENTS_FILE = os.path.join(DATA_DIR, 'comments.json')
+SHARES_FILE = os.path.join(DATA_DIR, 'shares.json')
+POSTS_FILE = os.path.join(DATA_DIR, 'posts.json')
+BOOKMARKS_FILE = os.path.join(DATA_DIR, 'bookmarks.json')
+COMMENT_LIKES_FILE = os.path.join(DATA_DIR, 'comment_likes.json')
+COMMENT_REPLIES_FILE = os.path.join(DATA_DIR, 'comment_replies.json')
+REPLY_LIKES_FILE = os.path.join(DATA_DIR, 'reply_likes.json')
+
+def _load(file_path: str) -> List[Dict[str, Any]]:
+    if not os.path.exists(file_path):
+        return []
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data if isinstance(data, list) else []
+    except (json.JSONDecodeError, IOError):
+        return []
+
+def _save(file_path: str, data: List[Dict[str, Any]]) -> None:
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+"""
+Helper functions and constants for JSON-based storage.
+This module provides abstraction for data persistence using local JSON files.
+"""
+
+import os
+import json
+import uuid
+from typing import Dict, Any, List
+
+# Data directory path
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+
+# Ensure data directory exists
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# File paths
+USERS_FILE = os.path.join(DATA_DIR, 'users.json')
+SETS_FILE = os.path.join(DATA_DIR, 'sets.json')
+TERMS_FILE = os.path.join(DATA_DIR, 'terms.json')
+PROGRESS_FILE = os.path.join(DATA_DIR, 'progress.json')
+LIKES_FILE = os.path.join(DATA_DIR, 'likes.json')
+COMMENTS_FILE = os.path.join(DATA_DIR, 'comments.json')
+SHARES_FILE = os.path.join(DATA_DIR, 'shares.json')
+POSTS_FILE = os.path.join(DATA_DIR, 'posts.json')
+BOOKMARKS_FILE = os.path.join(DATA_DIR, 'bookmarks.json')
+COMMENT_LIKES_FILE = os.path.join(DATA_DIR, 'comment_likes.json')
+COMMENT_REPLIES_FILE = os.path.join(DATA_DIR, 'comment_replies.json')
+REPLY_LIKES_FILE = os.path.join(DATA_DIR, 'reply_likes.json')
+
+
+def _load(file_path: str) -> List[Dict[str, Any]]:
+    """Load data from JSON file. Return empty list if file doesn't exist."""
+    if not os.path.exists(file_path):
+        return []
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data if isinstance(data, list) else []
+    except (json.JSONDecodeError, IOError):
+        return []
+
+
+def _save(file_path: str, data: List[Dict[str, Any]]) -> None:
+    """Save data to JSON file."""
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def create_set(name: str, description: str, language_from: str, language_to: str, user_id: str, visibility: str = 'private', owner_username: str = None) -> Dict[str, Any]:
+    """Create a new vocabulary set"""
+    from datetime import datetime
+    
+    sets = _load(SETS_FILE)
+    new_set = {
+        'id': str(uuid.uuid4()),
+        'name': name,
+        'description': description,
+        'language_from': language_from,
+        'language_to': language_to,
+        'user_id': user_id,
+        'owner_username': owner_username or user_id,
+        'visibility': visibility,
+        'created_at': datetime.utcnow().isoformat(),
+        'updated_at': datetime.utcnow().isoformat()
+    }
+    sets.append(new_set)
+    _save(SETS_FILE, sets)
+    return new_set
+
+
+def list_sets(user_id: str = None) -> List[Dict[str, Any]]:
+    """List vocabulary sets, optionally filtered by user"""
+    sets = _load(SETS_FILE)
+    
+    if user_id:
+        sets = [s for s in sets if s.get('user_id') == user_id]
+    
+    # Sort by created_at descending
+    sets.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    return sets
+
+
+def list_terms(set_id: str) -> List[Dict[str, Any]]:
+    """List all terms in a vocabulary set"""
+    terms = _load(TERMS_FILE)
+    return [t for t in terms if t.get('set_id') == set_id]
+"""
+Helper functions and constants for JSON-based storage.
+This module provides abstraction for data persistence using local JSON files.
+"""
+
+import os
+import json
+import uuid
+from typing import Dict, Any, List
+
+# Data directory path
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+
+# Ensure data directory exists
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# File paths
+USERS_FILE = os.path.join(DATA_DIR, 'users.json')
+SETS_FILE = os.path.join(DATA_DIR, 'sets.json')
+TERMS_FILE = os.path.join(DATA_DIR, 'terms.json')
+PROGRESS_FILE = os.path.join(DATA_DIR, 'progress.json')
+LIKES_FILE = os.path.join(DATA_DIR, 'likes.json')
+COMMENTS_FILE = os.path.join(DATA_DIR, 'comments.json')
+SHARES_FILE = os.path.join(DATA_DIR, 'shares.json')
+POSTS_FILE = os.path.join(DATA_DIR, 'posts.json')
+BOOKMARKS_FILE = os.path.join(DATA_DIR, 'bookmarks.json')
+COMMENT_LIKES_FILE = os.path.join(DATA_DIR, 'comment_likes.json')
+COMMENT_REPLIES_FILE = os.path.join(DATA_DIR, 'comment_replies.json')
+REPLY_LIKES_FILE = os.path.join(DATA_DIR, 'reply_likes.json')
+
+
+def _load(file_path: str) -> List[Dict[str, Any]]:
+    """Load data from JSON file. Return empty list if file doesn't exist."""
+    if not os.path.exists(file_path):
+        return []
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data if isinstance(data, list) else []
+    except (json.JSONDecodeError, IOError):
+        return []
+
+
+def _save(file_path: str, data: List[Dict[str, Any]]) -> None:
+    """Save data to JSON file."""
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def create_set(name: str, description: str, language_from: str, language_to: str, user_id: str, visibility: str = 'private', owner_username: str = None) -> Dict[str, Any]:
+    """Create a new vocabulary set"""
+    from datetime import datetime
+    
+    sets = _load(SETS_FILE)
+    new_set = {
+        'id': str(uuid.uuid4()),
+        'name': name,
+        'description': description,
+        'language_from': language_from,
+        'language_to': language_to,
+        'user_id': user_id,
+        'owner_username': owner_username or user_id,
+        'visibility': visibility,
+        'created_at': datetime.utcnow().isoformat(),
+        'updated_at': datetime.utcnow().isoformat()
+    }
+    sets.append(new_set)
+    _save(SETS_FILE, sets)
+    return new_set
+
+
+def list_sets(user_id: str = None) -> List[Dict[str, Any]]:
+    """List vocabulary sets, optionally filtered by user"""
+    sets = _load(SETS_FILE)
+    
+    if user_id:
+        sets = [s for s in sets if s.get('user_id') == user_id]
+    
+    # Sort by created_at descending
+    sets.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    return sets
+
+
+def list_terms(set_id: str) -> List[Dict[str, Any]]:
+    """List all terms in a vocabulary set"""
+    terms = _load(TERMS_FILE)
+    return [t for t in terms if t.get('set_id') == set_id]
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List

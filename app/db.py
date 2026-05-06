@@ -1,3 +1,11 @@
+"""Placeholder for database initialization (using JSON storage)"""
+
+def init_db():
+    """Initialize database - with JSON storage, just ensure data directory exists"""
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(base_dir, 'data')
+    os.makedirs(data_dir, exist_ok=True)
 import os
 from contextlib import contextmanager
 from datetime import datetime

@@ -182,6 +182,20 @@ def home(request: Request, session: Optional[str] = Cookie(None)):
     return RedirectResponse(url='/feed', status_code=303)
 
 
+@app.get('/upload', response_class=HTMLResponse)
+def upload_page(request: Request, session: Optional[str] = Cookie(None)):
+    username = get_current_user(session)
+    if not username:
+        return RedirectResponse(url='/login', status_code=303)
+
+    user_obj = get_user(username)
+    return templates.TemplateResponse('upload.html', context={
+        'request': request,
+        'username': username,
+        'user': user_obj,
+    })
+
+
 @app.post('/preview')
 async def preview(file: UploadFile = File(...), set_name: str = Form(...), language_from: str = Form('en'), language_to: str = Form('vi')):
     rows = await read_any(file)

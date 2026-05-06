@@ -1,4 +1,4 @@
-import hashlib
+from .auth import *import hashlib
 from typing import Any, Dict, Optional
 
 from .db import UserModel, session_scope, utc_now_iso
