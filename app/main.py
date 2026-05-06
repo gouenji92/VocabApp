@@ -212,40 +212,66 @@ async def import_data(
     meaning_col: Optional[str] = Form(None),
     visibility: str = Form('private'),
 ):
-    username = get_current_user(session)
-    if not username:
-        return { 'error': 'Vui lòng đăng nhập' }
-    rows = await read_any(file)
-    auto_map, _ = choose_mapping(rows)
-    word = word_col or auto_map.get('word')
-    meaning = meaning_col or auto_map.get('meaning')
-    pos = pos_col or auto_map.get('pos')
-    pronunciation = pronunciation_col or auto_map.get('pronunciation')
-    example = example_col or auto_map.get('example')
-    if not word or not meaning:
-        return { 'error': 'Không xác định được cột từ/ nghĩa' }
+    try:
+        username = get_current_user(session)
+        if not username:
+            return { 'error': 'Vui lòng đăng nhập' }
+        
+        rows = await read_any(file)
+        if not rows:
+            return { 'error': 'File trống hoặc định dạng không hợp lệ' }
+        
+        auto_map, _ = choose_mapping(rows)
+        word = word_col or auto_map.get('word')
+        meaning = meaning_col or auto_map.get('meaning')
+        pos = pos_col or auto_map.get('pos')
+        pronunciation = pronunciation_col or auto_map.get('pronunciation')
+        example = example_col or auto_map.get('example')
+        
+        if not word or not meaning:
+            return { 'error': 'Không xác định được cột từ/ nghĩa' }
 
-    sid = set_id
-    if not sid:
-        # create set locally with user_id
-        new_set = create_set(set_name or 'Bộ từ', f'Import from {file.filename}', language_from, language_to, username, 'private', username)
-        sid = new_set['id']
+        sid = set_id
+        if not sid:
+            try:
+                new_set = create_set(set_name or 'Bộ từ', f'Import from {file.filename}', language_from, language_to, username, visibility, username)
+                sid = new_set['id']
+            except Exception as e:
+                print(f"[ERROR] Failed to create set: {e}")
+                return { 'error': f'Lỗi tạo bộ từ: {str(e)}' }
 
-    inserted = 0
-    skipped = 0
-    for r in rows:
-        term_val = (r.get(word) or '').strip()
-        meaning_val = (r.get(meaning) or '').strip()
-        pos_val = (r.get(pos) or '').strip() if pos else None
-        pronunciation_val = (r.get(pronunciation) or '').strip() if pronunciation else None
-        example_val = (r.get(example) or '').strip() if example else None
-        if not term_val or not meaning_val:
-            skipped += 1
-            continue
-        add_term(sid, term_val, meaning_val, pos_val, pronunciation_val, example_val)
-        inserted += 1
+        inserted = 0
+        skipped = 0
+        errors = []
+        
+        for idx, r in enumerate(rows, 1):
+            try:
+                term_val = (r.get(word) or '').strip()
+                meaning_val = (r.get(meaning) or '').strip()
+                pos_val = (r.get(pos) or '').strip() if pos else None
+                pronunciation_val = (r.get(pronunciation) or '').strip() if pronunciation else None
+                example_val = (r.get(example) or '').strip() if example else None
+                
+                if not term_val or not meaning_val:
+                    skipped += 1
+                    continue
+                
+                add_term(sid, term_val, meaning_val, pos_val, pronunciation_val, example_val)
+                inserted += 1
+            except Exception as e:
+                errors.append(f"Row {idx}: {str(e)}")
+                skipped += 1
 
-    return { 'set_id': sid, 'inserted': inserted, 'skipped': skipped }
+        result = { 'set_id': sid, 'inserted': inserted, 'skipped': skipped }
+        if errors:
+            result['warnings'] = errors[:5]  # Show first 5 errors
+        return result
+        
+    except Exception as e:
+        print(f"[ERROR] Import failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return { 'error': f'Lỗi import: {str(e)}' }
 
 
 @app.get('/sets/create', response_class=HTMLResponse)
