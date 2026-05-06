@@ -224,8 +224,9 @@
     .btn-primary {
       flex: 1;
       padding: 10px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
+      /* Use lighter CTA gradient from design tokens; black text for readability */
+      background: var(--cta-gradient);
+      color: #111;
       border: none;
       border-radius: 8px;
       font-weight: 600;
@@ -237,7 +238,7 @@
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba(55, 133, 216, 0.35);
     }
 
     .empty-state {

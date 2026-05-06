@@ -12,6 +12,8 @@
   --brand-gradient: linear-gradient(135deg, var(--ns-deep-indigo) 0%, var(--ns-royal-blue) 40%, var(--ns-bright-blue) 100%);
   --accent-gradient: linear-gradient(135deg, var(--ns-lavender) 0%, var(--ns-pink) 55%, var(--ns-blush) 100%);
   --soft-gradient: linear-gradient(135deg, var(--ns-airy-blue) 0%, var(--ns-cloud) 100%);
+  /* Lighter CTA gradient for study buttons */
+  --cta-gradient: linear-gradient(135deg, var(--ns-bright-blue) 0%, #6FB6EE 60%, var(--ns-airy-blue) 100%);
 
   --bg: #f4f7fb;
   --bg-secondary: #ffffff;
@@ -63,6 +65,8 @@
   --primary-gradient: var(--brand-gradient);
   --accent: var(--ns-lavender);
   --accent-hover: var(--ns-pink);
+  /* Keep CTA gradient readable on dark theme */
+  --cta-gradient: linear-gradient(135deg, var(--ns-bright-blue) 0%, #5FAEEB 55%, var(--ns-airy-blue) 100%);
 
   --success: #2eaf6b;
   --warning: #e6af3d;
@@ -507,6 +511,17 @@ label[for], .custum-file-upload {
   box-shadow: none;
 }
 
+/* CTA button: lighter gradient with dark text for better readability */
+.btn-cta {
+  background: var(--cta-gradient) !important;
+  color: #111 !important;
+  box-shadow: 0 2px 8px rgba(55, 133, 216, 0.28);
+}
+
+.btn-cta:hover {
+  box-shadow: 0 4px 12px rgba(55, 133, 216, 0.35);
+}
+
 /* Button variants with Night Sky palette */
 .btn-soft {
   background: var(--soft-gradient);
@@ -662,6 +677,8 @@ textarea:focus::after {
 
 input::placeholder, textarea::placeholder {
   color: var(--text-tertiary);
+
+
 }
 header {
   background: var(--gradient);

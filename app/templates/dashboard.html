@@ -228,7 +228,7 @@
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba(100, 106, 136, 0.4);
     }
 
     .empty-state {
@@ -376,7 +376,7 @@
               <div class="muted" style="font-size:.75rem;letter-spacing:.5px;">{{ s.language_from }} → {{ s.language_to }}</div>
               <div class="actions">
                 <a href="/sets/{{ s.id }}" class="btn-ghost"><span class="iconify icon-collection icon-16 icon-gradient-accent" style="margin-right:4px;"></span>Chi tiết</a>
-                <a href="/study/{{ s.id }}?mode=select" class="btn" style="flex:1;min-width:120px;"><span class="iconify icon-target icon-16 icon-gradient-accent" style="margin-right:4px;"></span>Học</a>
+                <a href="/study/{{ s.id }}?mode=select" class="btn btn-cta" style="flex:1;min-width:120px;"><span class="iconify icon-target icon-16 icon-gradient-accent" style="margin-right:4px;"></span>Học</a>
               </div>
             </div>
             {% endfor %}
@@ -401,7 +401,7 @@
           </ul>
           <div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap;">
             {% if recent_sets %}
-            <a href="/study/{{ recent_sets[0].id }}?mode=select" class="btn"><span class="iconify icon-cards icon-16 icon-gradient-accent" style="margin-right:6px;"></span>Ôn ngay</a>
+            <a href="/study/{{ recent_sets[0].id }}?mode=select" class="btn btn-cta"><span class="iconify icon-cards icon-16 icon-gradient-accent" style="margin-right:6px;"></span>Ôn ngay</a>
             {% else %}
             <a href="#" class="btn" style="pointer-events:none;opacity:.4;"><span class="iconify icon-cards icon-16 icon-gradient-accent" style="margin-right:6px;opacity:.5;"></span>Ôn ngay</a>
             {% endif %}

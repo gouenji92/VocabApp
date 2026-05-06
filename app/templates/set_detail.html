@@ -42,7 +42,8 @@
     }
     .btn {
       padding: 10px 16px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      /* Lighter CTA gradient for primary action like "Học ngay" */
+      background: var(--cta-gradient);
       color: white;
       border: none;
       border-radius: 8px;
@@ -53,14 +54,14 @@
       align-items: center;
       justify-content: center;
       transition: all 0.3s;
-      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 2px 8px rgba(55, 133, 216, 0.28);
       font-size: 0.9rem;
       text-align: center;
       white-space: nowrap;
     }
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba(55, 133, 216, 0.35);
     }
     .btn-ghost {
       background: white;
@@ -203,7 +204,7 @@
       <p class="meta"><strong>Ngôn ngữ:</strong> {{ vset.language_from }} → {{ vset.language_to }}</p>
       
       <div class="actions">
-  <a href="/study/{{ vset.id }}?mode=select" class="btn"><span class="iconify icon-brain icon-18 icon-gradient-accent" style="margin-right:6px;"></span>Học ngay</a>
+  <a href="/study/{{ vset.id }}?mode=select" class="btn btn-cta"><span class="iconify icon-brain icon-18 icon-gradient-accent" style="margin-right:6px;"></span>Học ngay</a>
   <a href="/sets/{{ vset.id }}/export?format=csv" class="btn" style="background: linear-gradient(135deg,#06b6d4,#0ea5e9);"><span class="iconify icon-note icon-18" style="margin-right:6px;"></span>CSV</a>
   <a href="/sets/{{ vset.id }}/export?format=xlsx" class="btn" style="background: linear-gradient(135deg,#8b5cf6,#a78bfa);"><span class="iconify icon-chart icon-18" style="margin-right:6px;"></span>Excel</a>
   <a href="/sets/{{ vset.id }}/edit" class="btn" style="background: linear-gradient(135deg,#f59e0b,#fbbf24);"><span class="iconify icon-edit icon-18" style="margin-right:6px;"></span>Sửa</a>

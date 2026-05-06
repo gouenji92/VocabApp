@@ -126,14 +126,14 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### Bước 3: Cấu hình (Tùy chọn - cho AI features)
+### Bước 3: Cấu hình Supabase và AI
 
 ```powershell
 # Copy file .env mẫu
 copy .env.example .env
 
-# Mở .env và thêm OpenAI API key (nếu muốn dùng AI)
-# Xem hướng dẫn chi tiết tại AI_FEATURES.md
+# Mở .env và dán Supabase DATABASE_URL vào đó
+# Thêm OpenAI API key nếu muốn dùng AI
 notepad .env
 ```
 
@@ -243,7 +243,7 @@ AI_FEATURES.md         # AI features documentation
 
 - **Backend**: FastAPI (Python 3.11+)
 - **Frontend**: Jinja2 Templates + Vanilla JavaScript
-- **Storage**: JSON files (no database required)
+- **Storage**: PostgreSQL qua Supabase hoặc SQLite cục bộ khi chưa cấu hình `DATABASE_URL`
 - **AI**: OpenAI API (GPT-3.5-turbo)
 - **Authentication**: Session-based with itsdangerous
 - **File Processing**: openpyxl (XLSX), csv (CSV)
